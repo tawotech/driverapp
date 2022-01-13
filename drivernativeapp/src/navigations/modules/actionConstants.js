@@ -1,0 +1,5 @@
+export default{
+    LOGIN:"LOGIN",
+    LOGOUT:"LOGOUT",
+    RETRIEVE_TOKEN: "RETRIEVE_TOKEN"
+}
