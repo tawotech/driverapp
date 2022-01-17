@@ -1,6 +1,7 @@
 import React, {useContext, useState} from 'react'
 //import { View, Text, TextInput, Button } from "react-native";
 import { AuthContext } from '../../../components/context';
+import { images } from '../../../components/context';
 
 import {
     Box,
@@ -9,9 +10,9 @@ import {
     VStack,
     FormControl,
     Input,
-    HStack,
     Center,
-    Pressable
+    Pressable,
+    Image
   } from "native-base"
 
 
@@ -19,7 +20,7 @@ const Login = ({navigation}) =>
 {
 
     const [data, setData] = useState({
-        email: 'tawomusash@gmail.com',
+        email: 'tawomusash2@gmail.com',
         password: 'Musash8606'
     })
     const {login} = useContext(AuthContext);    
@@ -50,6 +51,12 @@ const Login = ({navigation}) =>
                     size="xl"
                     textAlign="center"
                 >
+                    <Image
+                        size={8}
+                        resizeMode={"contain"}
+                        source={images.locationIcon}
+                        alt="Alternate Text"
+                    />
                     etapath
                 </Heading>
                 <VStack space={3} mt="5">

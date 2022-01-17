@@ -15,3 +15,7 @@ export const colorTheme = {
         400: "#745D95",
     }
 }
+
+export const images = {
+    locationIcon: require('../assets/locationIcon.png')
+}

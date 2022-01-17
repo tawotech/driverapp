@@ -121,7 +121,6 @@ function handleLogout(state, action){
 }
 
 function handleLogin(state, action){
-    console.log("in handle login");
     return update( state,{
         userToken:{ $set: action.payload.userToken },
         isLoading: { $set: false }
