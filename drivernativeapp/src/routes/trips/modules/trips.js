@@ -34,7 +34,6 @@ export const getGroupedTripsAction = () =>{
             }
         })
         .then(async (res)=>{
-            console.log(res);
             dispatch({
                 type: GET_GROUPED_TRIPS,
                 payload: {

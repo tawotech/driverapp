@@ -30,6 +30,12 @@ const Trips = ({
         getGroupedTripsAction();
     },[]);
 
+    const viewTrip = (tripId) =>{
+        navigation.navigate("viewTrip",{
+            tripId
+        });
+    }
+
     return(
         <Box
             bg='#E5E5E5'
@@ -42,7 +48,7 @@ const Trips = ({
             }   
             <Header showBackIcon = {false}/>
             <SectionList
-                px = "20px"
+                px = "10px"
                 pb = "10px"
                 h= '90%'
                 sections={
@@ -66,6 +72,8 @@ const Trips = ({
                             dateStamp = {item.date}
                             id = {item.trip_id}
                             tag = {item.tag}
+                            viewTrip = {viewTrip}
+                            clickable={true}
                         />
                     )
                    

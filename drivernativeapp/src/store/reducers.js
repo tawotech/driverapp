@@ -1,13 +1,15 @@
 import {combineReducers} from 'redux'
 import {LoginReducer as login} from '../routes/login/modules/login'
 import {TripsReducer as trips} from '../routes/trips/modules/trips'
-import { NavigationReducer as navigate } from '../navigations/modules/navigation'
+import {NavigationReducer as navigate } from '../navigations/modules/navigation'
+import { ViewTripReducer as viewTrip } from '../routes/viewtrip/modules/viewTrip'
 
 export const makeAppReducer = () => {
     return combineReducers({
         login,
         trips,
-        navigate
+        navigate,
+        viewTrip
         // all single reducers are added here
     });
 }

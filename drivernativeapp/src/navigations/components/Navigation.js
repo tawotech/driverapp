@@ -11,7 +11,7 @@ const AuthStack= createNativeStackNavigator();
 
 import LoginContainer from '../../routes/login/containers/LoginContainer'
 import TripsContainer from '../../routes/trips/containers/TripsContainer';
-
+import ViewTripContainer from '../../routes/viewtrip/containers/ViewTripContainer';
 import { colorTheme } from '../../components/context';
 const theme = extendTheme({colors: colorTheme})
 
@@ -64,6 +64,13 @@ export default function Navigation({
                             <MainStack.Screen 
                                 name = 'trips' 
                                 component = {TripsContainer}
+                                options = {{
+                                    headerShown:false
+                                }}
+                            />
+                            <MainStack.Screen 
+                                name = 'viewTrip' 
+                                component = {ViewTripContainer}
                                 options = {{
                                     headerShown:false
                                 }}

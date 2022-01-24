@@ -8,10 +8,14 @@ import {
   } from "native-base"
 
 import { images } from '../components/context';
+import { Pressable } from 'react-native';
 
 const Header = ({navigation, showBackIcon} ) =>
 {
 
+    const onGoBack = () =>{
+        navigation.navigate("trips");
+    }
     return(
         <HStack
             w='100%'
@@ -22,16 +26,22 @@ const Header = ({navigation, showBackIcon} ) =>
         >
             {
                 showBackIcon &&
-                <Center
-                    position='absolute'
-                    left='0'
-                    pl={5}
-                >
-                    <ChevronLeftIcon  
-                        size = '8'
-                        color= '#ADABB0'
-                    />
-                </Center>
+                
+                    <Center
+                        position='absolute'
+                        left='0'
+                        pl={5}
+                    >
+                        <Pressable
+                            onPress={()=> onGoBack()}
+                        >
+                            <ChevronLeftIcon  
+                                size = '8'
+                                color= '#ADABB0'
+                            />
+                        </Pressable>
+
+                    </Center>
             }
            
             <Image

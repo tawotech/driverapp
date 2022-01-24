@@ -14,12 +14,15 @@ import {
   } from "native-base"
 
 
-  const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const TripComponent = ({
     company,
     time,
     tag,
-    dateStamp
+    dateStamp,
+    id,
+    viewTrip,
+    clickable
 }) =>{
 
     const [dateMonth,setDateMonth] = useState({
@@ -40,74 +43,79 @@ const TripComponent = ({
 
 
     return(
-        <HStack
-            borderRadius='10'
-            bg ='#FFFFFF'
-            marginBottom='2'
+        <Pressable
+            onPress={()=> viewTrip(id)}
+            disabled = {(clickable == true) ? false : true }
         >
-            <VStack 
-                bg='#D8D5DF'
-                py='2'
-                px = '2'
-                borderLeftRadius='10'
+            <HStack
+                borderRadius='10'
+                bg ='#FFFFFF'
+                marginBottom='2'
             >
-                <Center
-                    bg='#745D95'
+                <VStack 
+                    bg='#D8D5DF'
+                    py='2'
                     px = '2'
-                    py= '2'
-                    borderRadius='10'
+                    borderLeftRadius='10'
                 >
-                    <Text
-                        fontSize='sm'
-                        fontWeight='bold'
-                        color='#FFFFFF'
-                    >{dateMonth.date}</Text>
-                    <Text
-                        fontSize='sm'
-                        fontWeight='bold'
-                        color='#FFFFFF'
-                    >{MONTH_OF_THE_YEAR[dateMonth.month]}</Text>
-                </Center>
-            </VStack>
-            <VStack
-                pl='2'
-                py='2'
-            >
-                <HStack>
-                    <VStack>
-                        <Text
-                            color='#ADABB0'
-                        >TIME</Text>
-                        <Text
-                            color='#535156'
-                            fontWeight='bold'
-                        >{time}</Text>
-                    </VStack>
-
-                    <VStack
-                        pl= '2'
+                    <Center
+                        bg='#745D95'
+                        px = '2'
+                        py= '2'
+                        borderRadius='10'
                     >
                         <Text
+                            fontSize='sm'
+                            fontWeight='bold'
+                            color='#FFFFFF'
+                        >{dateMonth.date}</Text>
+                        <Text
+                            fontSize='sm'
+                            fontWeight='bold'
+                            color='#FFFFFF'
+                        >{MONTH_OF_THE_YEAR[dateMonth.month]}</Text>
+                    </Center>
+                </VStack>
+                <VStack
+                    pl='2'
+                    py='2'
+                >
+                    <HStack>
+                        <VStack>
+                            <Text
+                                color='#ADABB0'
+                            >TIME</Text>
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{time}</Text>
+                        </VStack>
+
+                        <VStack
+                            pl= '2'
+                        >
+                            <Text
+                                color='#ADABB0'   
+                            >COMPANY</Text>
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{company}</Text>
+                        </VStack>
+
+                    </HStack>
+                    <Box pt = '2'>
+                        <Text
                             color='#ADABB0'   
-                        >COMPANY</Text>
+                        >REF NUMBER</Text>
                         <Text
                             color='#535156'
                             fontWeight='bold'
-                        >{company}</Text>
-                    </VStack>
-
-                </HStack>
-                <Box pt = '2'>
-                    <Text
-                        color='#ADABB0'   
-                    >REF NUMBER</Text>
-                    <Text
-                        color='#535156'
-                        fontWeight='bold'
-                    >{tag}</Text>
-                </Box>
-            </VStack>
-        </HStack>
+                        >{tag}</Text>
+                    </Box>
+                </VStack>
+            </HStack>
+        </Pressable>
     )
 }
 export default TripComponent
