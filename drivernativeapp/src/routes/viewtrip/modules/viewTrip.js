@@ -7,6 +7,8 @@
  import axios from 'axios';
  import apiConstants from '../../../api/apiConstants'
  import { Linking, Alert } from 'react-native';
+ import PushNotification from 'react-native-push-notification'
+
 
  const {url} = apiConstants;
  // login initial state
@@ -52,6 +54,35 @@ const {
     DECLINE_TRIP,
     SKIP_TRIP
 } = actionConstants;
+const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+const handleNotification = (date,time) =>{
+
+    let formatedTime = time.split(":");
+    let notifDate = new Date(date);
+    notifDate.setHours(formatedTime[0]);
+    if(formatedTime[1] == "00AM" || formatedTime[1] == "00PM")
+    {
+        formatedTime[1] = 0;
+    }
+    else{
+        formatedTime[1] = 30;
+    }
+    notifDate.setMinutes(formatedTime[1]);
+
+    // change to an hour before
+    notifDate.setHours(notifDate.getHours()-1);
+
+    PushNotification.localNotificationSchedule({
+        channelId: "app-channel",
+        title: `Etapath Trip Message`,
+        message: `You have a trip booked for ${notifDate.getDate()}/${MONTH_OF_THE_YEAR[notifDate.getMonth()]}/${notifDate.getFullYear()} at ${time}, get ready!`,
+        date: new Date(Date.now() + 10 * 1000),
+        //date: notifDate,
+        allowWhileIdle: true
+    })
+}
+
 
 /**
  * Actions
@@ -111,11 +142,13 @@ export function getTripDataAction(id)
             });
 
             dispatch(isLoadingAction(false));
-
             if(res.data.status == "on_route")
             {
                 dispatch(getPassengerAction());
             }
+
+            //handleNotification(res.data.date,res.data.time);
+
         })
         .catch((e)=>{
             console.log(e);
@@ -145,6 +178,10 @@ export function acceptTripAction()
                     status: res.data.status,
                 }
             });
+
+            const {date , time} = store().viewTrip;
+
+            handleNotification(date, time);
         })
         .catch((e)=>{
             console.log(e);

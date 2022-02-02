@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useState,useEffect} from 'react'
 //import { View, Text, TextInput, Button } from "react-native";
 import { AuthContext } from '../../../components/context';
 import { images } from '../../../components/context';
@@ -15,9 +15,21 @@ import {
     Image
   } from "native-base"
 
+import PushNotification from 'react-native-push-notification';
 
 const Login = ({navigation}) =>
 {
+
+    const createChannels = () => {
+        PushNotification.createChannel({
+            channelId: "app-channel",
+            channelName: "App Channel"
+        })
+    }
+
+    useEffect(()=>{
+        createChannels();
+    },[]);
 
     const [data, setData] = useState({
         email: 'tawomusash2@gmail.com',
