@@ -9,8 +9,8 @@ import {
 
 
 
-const Destination = ({
-    destination
+const Origin = ({
+    origin
 }) =>
 {
     return(
@@ -28,17 +28,35 @@ const Destination = ({
                     w='3'
                     h='3'
                 />
+                {
+                    [1,2].map((index)=>(
+                        <Center
+                            key= {index}
+                            h='1'
+                            w='0.5'
+                            marginTop='1'
+                            marginX='1'
+                            bg = '#ADABB0'
+                        />
+                    ))
+                }
             </VStack>
 
-            <Box
+            <VStack
                 w='95%'
             >
                 <Text
                     color='#535156'
                     isTruncated
-                >{destination}</Text>
-            </Box>
+                >{origin}</Text>
+                <Center
+                    borderTopWidth='2'
+                    borderTopColor='#EEEDF0'
+                    marginTop='2'
+                    w = '100%'
+                />
+            </VStack>
         </HStack>
     )
 }
-export default Destination;
+export default Origin;

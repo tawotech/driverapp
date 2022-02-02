@@ -5,15 +5,27 @@ import {
     HStack,
     Center,
   } from "native-base"
+import { Pressable } from 'react-native';
 
 
 
 const Passenger = ({
     index,
     numTrips,
-    trip
+    trip,
+    openCallDialogAction
 }) =>
 {
+
+    const separator = ( numTrips,index) =>{
+        let remainder = numTrips % (index+1);
+        if( remainder <= 1)
+        {
+            return false
+        }
+
+        return true;
+    }
     return(
         <HStack w= "100%">
             <VStack
@@ -30,16 +42,31 @@ const Passenger = ({
                     h='3'
                 />
                 {
-                    [1,2,3,4].map((index)=>(
-                        <Center
-                            key= {index}
-                            h='1'
-                            w='0.5'
-                            marginTop='1'
-                            marginX='1'
-                            bg = '#ADABB0'
-                        />
-                    ))
+                    trip.trip_type == "inbound" ?
+                        [1,2,3,4].map((index)=>(
+                            <Center
+                                key= {index}
+                                h='1'
+                                w='0.5'
+                                marginTop='1'
+                                marginX='1'
+                                bg = '#ADABB0'
+                            />
+                        ))
+                    :
+                        (index != (numTrips-1)) ?
+                            [1,2,3,4].map((index)=>(
+                                <Center
+                                    key= {index}
+                                    h='1'
+                                    w='0.5'
+                                    marginTop='1'
+                                    marginX='1'
+                                    bg = '#ADABB0'
+                                />
+                            ))
+                        :
+                        <></>
                 }
             </VStack>
 
@@ -50,26 +77,54 @@ const Passenger = ({
             >
                 <Text
                     color='#535156'
-                >{trip.location}</Text>
+                    isTruncated
+                >{ (trip.trip_type == "inbound") ? trip.location : trip.destination}</Text>
                 <HStack justifyContent='space-between'>
                     <Text
                         fontWeight='bold'
                         color="#535156"
                     > {`${trip.name} ${trip.surname}`}</Text>
-                    <Text
-                        fontWeight='bold'
-                        color='#745D95'
-                        underline
-                    >{`${trip.contact_number}`}</Text>                               
+                    <Pressable
+                        onPress={()=>openCallDialogAction()}
+                    >
+                        <Text
+                            fontWeight='bold'
+                            color='#745D95'
+                            underline
+                        >{`${trip.contact_number}`}</Text>           
+                    </Pressable>
+                                        
                 </HStack>
                 {
-                    (index != (numTrips-1)) && 
-                    <Center
-                        borderTopWidth='2'
-                        borderTopColor='#EEEDF0'
-                        marginTop='1'
-                        w = '100%'
-                    />
+                    trip.trip_type == "inbound" ?
+                        (index != (numTrips-1)) && 
+                        <Center
+                            borderTopWidth='2'
+                            borderTopColor='#EEEDF0'
+                            marginTop='1'
+                            w = '100%'
+                        />
+                    :
+        
+                        ()=>{
+                            if (separator() == true){
+                                return(
+                                    <Center
+                                        borderTopWidth='2'
+                                        borderTopColor='#EEEDF0'
+                                        marginTop='1'
+                                        w = '1 00%'
+                                    />
+                                )
+                            }
+                            else
+                            {
+                                return (<></>)
+                            }
+                            
+                        }
+                                
+                      
                 }
             </VStack>
         </HStack>

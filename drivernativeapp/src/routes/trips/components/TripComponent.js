@@ -12,7 +12,7 @@ import {
     FlatList,
     Button
   } from "native-base"
-
+import InnerStatusComponent from './InnerStatusComponet'
 
 const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const TripComponent = ({
@@ -22,7 +22,10 @@ const TripComponent = ({
     dateStamp,
     id,
     viewTrip,
-    clickable
+    clickable,
+    firstPassenger,
+    status,
+    total_distance
 }) =>{
 
     const [dateMonth,setDateMonth] = useState({
@@ -52,6 +55,7 @@ const TripComponent = ({
                 bg ='#FFFFFF'
                 marginBottom='2'
             >
+                <InnerStatusComponent status={status}/>
                 <VStack 
                     bg='#D8D5DF'
                     py='2'
@@ -107,11 +111,29 @@ const TripComponent = ({
                     <Box pt = '2'>
                         <Text
                             color='#ADABB0'   
+                        >TOTAL DISTANCE</Text>
+                        <Text
+                            color='#535156'
+                            fontWeight='bold'
+                        >{total_distance}</Text>
+                    </Box>
+                    <Box pt = '2'>
+                        <Text
+                            color='#ADABB0'   
                         >REF NUMBER</Text>
                         <Text
                             color='#535156'
                             fontWeight='bold'
                         >{tag}</Text>
+                    </Box>
+                    <Box pt = '2'>
+                        <Text
+                            color='#ADABB0'   
+                        >PASSENGER</Text>
+                        <Text
+                            color='#535156'
+                            fontWeight='bold'
+                        >{`${firstPassenger}`}</Text>
                     </Box>
                 </VStack>
             </HStack>

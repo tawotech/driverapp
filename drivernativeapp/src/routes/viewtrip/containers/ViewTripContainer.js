@@ -7,7 +7,11 @@ import {
     onRouteAction,
     getPassengerAction,
     completeTripAction,
-    endTripAction
+    endTripAction,
+    openInGoogeMapsAction,
+    openCallDialogAction,
+    declineTripAction,
+    skipTripAction
 } from '../modules/viewTrip'
 
 const mapStateToProps = (state) =>({
@@ -21,13 +25,15 @@ const mapStateToProps = (state) =>({
     order: state.viewTrip.order,
     trips: state.viewTrip.trips,
     isLoading: state.viewTrip.isLoading,
+    passengerIsLoading: state.viewTrip.passengerIsLoading,
     passenger: state.viewTrip.passenger,
     passengerStatus: state.viewTrip.passengerStatus,
     passengerBound: state.viewTrip.passengerBound,
     passengerLocation: state.viewTrip.passengerLocation,
     passengerDestination: state.viewTrip.passengerDestination,
     passengerName: state.viewTrip.passengerName,
-    passengerSurname: state.viewTrip.passengerSurname
+    passengerSurname: state.viewTrip.passengerSurname,
+    firstPassenger: state.viewTrip.firstPassenger
 });
 
 const mapActionCreators = {
@@ -36,7 +42,11 @@ const mapActionCreators = {
     onRouteAction,
     getPassengerAction,
     completeTripAction,
-    endTripAction
+    endTripAction,
+    openInGoogeMapsAction,
+    openCallDialogAction,
+    declineTripAction,
+    skipTripAction
 };
 
 export default connect (mapStateToProps,mapActionCreators)(ViewTrip); 

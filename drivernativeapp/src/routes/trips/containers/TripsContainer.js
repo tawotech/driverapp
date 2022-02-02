@@ -9,7 +9,8 @@ import {
 const mapStateToProps = (state) =>({
     completeTrips: state.trips.completeTrips,
     incompleteTrips: state.trips.incompleteTrips,
-    vehicle: state.trips.vehicle
+    vehicle: state.trips.vehicle,
+    isLoading: state.trips.isLoading
 });
 
 const mapActionCreators = {

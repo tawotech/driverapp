@@ -7,6 +7,7 @@ import {
     Center,
     Spinner
 } from "native-base"
+import SwipeButton from '../../../../../components/SwipeButton'
 
 const ConfirmationComponent = ({
     getPassengerAction,
@@ -14,16 +15,27 @@ const ConfirmationComponent = ({
     passengerBound,
     passengerName,
     passengerSurname,
-    passsengerDestination,
+    passengerDestination,
     passengerLocation,
-    completeTripAction
+    completeTripAction,
+    passengerIsLoading,
+    status,
+    skipTripAction
 }) =>
 {
-    useEffect(()=>{
-        setTimeout(()=>getPassengerAction(),250);
-    },[]);
+    const onPressAction = (status,isToggled) =>{
+        console.log(isToggled);
+        if(isToggled == "right")
+        {
+            completeTripAction();
+        }
+        else if(isToggled == "left")
+        {
+            skipTripAction();
+        }
+    }
 
-    if(passenger == null)
+    if(passengerIsLoading == true)
     {
         return(
             <Center>
@@ -46,7 +58,7 @@ const ConfirmationComponent = ({
                 color= 'green.700'
             >On route to:
             </Text>
-            <Text>{` ${passengerBound == 'inbound' ? passengerLocation : passsengerDestination}`}</Text>
+            <Text>{` ${passengerBound == 'inbound' ? passengerLocation : passengerDestination}`}</Text>
             {
                 <Text
                     color= 'green.700'
@@ -55,22 +67,36 @@ const ConfirmationComponent = ({
                 >{`${passengerName} ${passengerSurname}`}</Text>
             }
 
-            <Pressable
-                onPress={()=>completeTripAction()}
-            >
-                <Box
-                    bg={'green.700'}
-                    py='2'
-                    px='2'
-                    borderRadius='10'
-                    marginTop='3'
+            {
+                <Center
+                    alignItems={'center'}
+                    width= '100%'
                 >
-                    <Text
-                        color= 'white'
-                        fontWeight='bold'
-                    >{passengerBound == 'inbound' ? 'Confirm pickup' : 'Confirm dropoff'}</Text>
-                </Box>
-            </Pressable>
+                    <SwipeButton onToggle={onPressAction} 
+                        status = {status}
+                        leftText={"Skip"}
+                        rightText={passengerBound == 'inbound' ? 'Confirm pickup' : 'Confirm dropoff'}
+                    />
+                </Center>
+                
+                /*
+                <Pressable
+                    onPress={()=>completeTripAction()}
+                >
+                    <Box
+                        bg={'green.700'}
+                        py='2'
+                        px='2'
+                        borderRadius='10'
+                        marginTop='3'
+                    >
+                        <Text
+                            color= 'white'
+                            fontWeight='bold'
+                        >{passengerBound == 'inbound' ? 'Confirm pickup' : 'Confirm dropoff'}</Text>
+                    </Box>
+                </Pressable>*/
+            }
         </VStack>
     )
 

@@ -1,5 +1,4 @@
 import React, {useState, useContext, useEffect} from 'react'
-import { AuthContext } from '../../../components/context';
 import Header from '../../../components/Header';
 import TripComponent from './TripComponent';
 import {
@@ -14,21 +13,26 @@ import {
     Pressable,
     FlatList,
     Button,
-    SectionList
+    SectionList,
+    Spinner
   } from "native-base"
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const Trips = ({
     navigation,
     getGroupedTripsAction,
     completeTrips,
     incompleteTrips,
-    vehicle
+    vehicle,
+    isLoading
 }) =>
 {
-    const {logout} =  useContext(AuthContext);
-    useEffect(()=>{
-        getGroupedTripsAction();
-    },[]);
+    useFocusEffect(
+        React.useCallback(()=>{
+            getGroupedTripsAction();
+        },[]),
+    );
 
     const viewTrip = (tripId) =>{
         navigation.navigate("viewTrip",{
@@ -36,21 +40,23 @@ const Trips = ({
         });
     }
 
+    if(isLoading == true)
+    {
+        return(
+            <Center flex = {1}>
+                <Spinner size="large"/>
+            </Center>
+        )
+    }
+
     return(
         <Box
             bg='#E5E5E5'
         >
-            {
-                /*<Button 
-                    title =  'logout' 
-                    onPress = {()=> logout()}
-                />*/
-            }   
-            <Header showBackIcon = {false}/>
             <SectionList
                 px = "10px"
                 pb = "10px"
-                h= '90%'
+                h= '100%'
                 sections={
                     [
                         {
@@ -64,7 +70,7 @@ const Trips = ({
                     ]
                 }
                 keyExtractor={(item)=> item.trip_id}
-                renderItem={({item})=>{                    
+                renderItem={({item})=>{  
                     return(
                         <TripComponent
                             time = {item.time}
@@ -74,6 +80,9 @@ const Trips = ({
                             tag = {item.tag}
                             viewTrip = {viewTrip}
                             clickable={true}
+                            firstPassenger = {item.first_passenger}
+                            status = {item.status}
+                            total_distance={item.total_distance}
                         />
                     )
                    

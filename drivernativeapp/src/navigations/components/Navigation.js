@@ -1,26 +1,31 @@
 import React,{useEffect,useState, useMemo} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View } from 'react-native';
+import { createDrawerNavigator } from "@react-navigation/drawer"
+import { ActivityIndicator, View,Text } from 'react-native';
 
 import { AuthContext } from '../../components/context';
 import { NativeBaseProvider, extendTheme} from 'native-base'
 
 const MainStack = createNativeStackNavigator();
 const AuthStack= createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
 import LoginContainer from '../../routes/login/containers/LoginContainer'
 import TripsContainer from '../../routes/trips/containers/TripsContainer';
 import ViewTripContainer from '../../routes/viewtrip/containers/ViewTripContainer';
 import { colorTheme } from '../../components/context';
-const theme = extendTheme({colors: colorTheme})
+import CustomDrawerContent from './CustomDrawerContent';
+import Header from '../../components/Header';
+const theme = extendTheme({colors: colorTheme});
 
-export default function Navigation({
+
+const Navigation = ({
     loginState,
     logoutAction,
     loginAction,
     retrieveTokenAction
-}){
+}) => {
     const authContext = useMemo(()=>({
         login:(email, password)=>{
             loginAction(email, password);
@@ -28,14 +33,37 @@ export default function Navigation({
         logout:()=>{
             logoutAction();
         }
-    }))
+    }));
+
+    function root(){
+        return(
+            <Drawer.Navigator
+                initialRouteName='trips'
+                drawerContent={(props)=> <CustomDrawerContent {...props} />}
+                screenOptions={{
+                    drawerPosition:"right"
+                }}
+            >
+                <Drawer.Screen 
+                    name="trips" 
+                    component={TripsContainer}
+                    options={{
+                        headerShown: true,
+                        header: props => <Header {...props}/>
+                    }} 
+                />
+            </Drawer.Navigator>
+        );
+    }
 
     useEffect(()=>{
         setTimeout(()=>{
             retrieveTokenAction();
         }, 2000);
     },[]);
- 
+
+    console.log(loginState.isLoading);
+
     if (loginState.isLoading)
     {
         return(
@@ -47,38 +75,45 @@ export default function Navigation({
 
     return(
         <AuthContext.Provider value={authContext}>
-            <NavigationContainer>
-                <NativeBaseProvider theme={theme}>
-                    { loginState.userToken == null ? 
-                        <AuthStack.Navigator>
-                            <AuthStack.Screen 
-                                name='login' 
-                                component = {LoginContainer}
-                                options = {{
-                                    headerShown:false
-                                }}
-                            />
-                        </AuthStack.Navigator>
-                        :
-                        <MainStack.Navigator>
-                            <MainStack.Screen 
-                                name = 'trips' 
-                                component = {TripsContainer}
-                                options = {{
-                                    headerShown:false
-                                }}
-                            />
-                            <MainStack.Screen 
-                                name = 'viewTrip' 
-                                component = {ViewTripContainer}
-                                options = {{
-                                    headerShown:false
-                                }}
-                            />
-                        </MainStack.Navigator>
-                    }
-                </NativeBaseProvider>
-            </NavigationContainer>
+            {
+                <NavigationContainer>
+                    <NativeBaseProvider theme={theme}>
+                        { loginState.userToken == null ?
+                            <AuthStack.Navigator>
+                                <AuthStack.Screen 
+                                    name='login' 
+                                    component = {LoginContainer}
+                                    options = {{
+                                        headerShown:false
+                                    }}
+                                />
+                            </AuthStack.Navigator>
+                            :
+                            <MainStack.Navigator
+                                initialRouteName='trips'
+                            >
+                                <MainStack.Screen 
+                                    name = 'root' 
+                                    component = {root}
+                                    options = {{
+                                        headerShown: false,
+                                    }}
+                                />
+                                <MainStack.Screen 
+                                    name = 'viewTrip' 
+                                    component = {ViewTripContainer}
+                                    options = {{
+                                        headerShown:true,
+                                        header: props => <Header navigation={props.navigation} showBackIcon={true}/>
+                                    }}
+                                />
+                            </MainStack.Navigator>
+                        }
+                    </NativeBaseProvider>
+                </NavigationContainer>
+            }
         </AuthContext.Provider>
     )
 }
+
+export default Navigation

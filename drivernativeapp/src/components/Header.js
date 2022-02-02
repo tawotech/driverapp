@@ -12,14 +12,18 @@ import { Pressable } from 'react-native';
 
 const Header = ({navigation, showBackIcon} ) =>
 {
-
+    console.log(navigation);
     const onGoBack = () =>{
         navigation.navigate("trips");
+    }
+
+    const openAppDrawer = ()=>{
+        navigation.toggleDrawer();
     }
     return(
         <HStack
             w='100%'
-            h= "10%"
+            h= '20'
             bg = '#FFFFFF'
             alignItems={'center'}
             justifyContent={'center'}
@@ -50,16 +54,22 @@ const Header = ({navigation, showBackIcon} ) =>
                 source={images.locationIcon}
                 alt="Alternate Text"
             />
-            <Center
-                position='absolute'
-                right = '0'
-                pr={5}
-            >
-                <HamburgerIcon 
-                    size = '8'
-                    color= '#ADABB0'
-                />
-            </Center>
+            
+                <Center
+                    position='absolute'
+                    right = '0'
+                    pr={5}
+                >
+                    <Pressable
+                        onPress={()=>openAppDrawer()}
+                    >
+                        <HamburgerIcon 
+                            size = '8'
+                            color= '#ADABB0'
+                        />
+                    </Pressable>
+
+                </Center>
         </HStack>
         
     )

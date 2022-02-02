@@ -7,14 +7,6 @@ import {
   } from "native-base"
 
 const EndTripComponent = ({
-    getPassengerAction,
-    passenger,
-    passengerBound,
-    passengerName,
-    passengerSurname,
-    passsengerDestination,
-    passengerLocation,
-    completeTripAction,
     endTripAction
 }) =>
 {
@@ -35,7 +27,7 @@ const EndTripComponent = ({
                     py='2'
                     px='2'
                     borderRadius='10'
-                    marginTop='3'
+                    //marginTop='3'
                 >
                     <Text
                         color= 'white'

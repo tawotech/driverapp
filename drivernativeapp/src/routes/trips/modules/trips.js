@@ -12,7 +12,8 @@
 const initialState = {
     completeTrips: [],
     incompleteTrips:[],
-    vehicle: null
+    vehicle: null,
+    isLoading: false
 };
 
  /**
@@ -20,20 +21,37 @@ const initialState = {
  */
 
 const {
-    GET_GROUPED_TRIPS
+    GET_GROUPED_TRIPS,
+    TRIPS_IS_LOADING
 } = actionConstants;
 
 /**
  * Actions
  */
+
+export function isLoadingAction(isLoading)
+{
+    return (dispatch, store)=>{
+        dispatch({
+            type: TRIPS_IS_LOADING,
+            payload:{
+                isLoading
+            }
+        })
+    }
+}
 export const getGroupedTripsAction = () =>{
     return (dispatch, store)=>{
+
+        dispatch(isLoadingAction(true));
+
         axios.get(`http://${url}/api_dashboard/index`,{
             headers:{
                 'Authorization': `Bearer ${store().navigate.userToken}`
             }
         })
         .then(async (res)=>{
+            console.log(res.data.complete_trips);
             dispatch({
                 type: GET_GROUPED_TRIPS,
                 payload: {
@@ -42,6 +60,8 @@ export const getGroupedTripsAction = () =>{
                     incompleteTrips: res.data.incomplete_trips
                 }
             });
+
+            dispatch(isLoadingAction(false));
         })
         .catch((e)=>{
             console.log(e);
@@ -59,8 +79,16 @@ function handleGetGroupedTrips (state,action){
         incompleteTrips:{ $set: action.payload.incompleteTrips}
     })
 }
+
+function handleIsLoading (state,action){
+    return update(state,{
+        isLoading:{ $set: action.payload.isLoading}
+    })
+}
+
 const ACTION_HANDLERS = {
-    GET_GROUPED_TRIPS: handleGetGroupedTrips
+    GET_GROUPED_TRIPS: handleGetGroupedTrips,
+    TRIPS_IS_LOADING: handleIsLoading
 }
 
 export function TripsReducer (state = initialState, action){

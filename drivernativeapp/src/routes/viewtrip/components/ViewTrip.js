@@ -1,5 +1,4 @@
 import React, {useState, useContext, useEffect} from 'react'
-import { AuthContext } from '../../../components/context';
 import Header from '../../../components/Header';
 import {
     Box,
@@ -26,6 +25,7 @@ const ViewTrip = ({
     total_distance,
     trips,
     isLoading,
+    passengerIsLoading,
     acceptTripAction,
     onRouteAction,
     order,
@@ -37,7 +37,12 @@ const ViewTrip = ({
     passengerName,
     passengerSurname,
     completeTripAction,
-    endTripAction
+    endTripAction,
+    openInGoogeMapsAction,
+    openCallDialogAction,
+    firstPassenger,
+    declineTripAction,
+    skipTripAction
 }) =>
 {
     const { tripId }  = route.params; 
@@ -45,12 +50,10 @@ const ViewTrip = ({
         getTripDataAction(tripId);
     },[]);
 
-    const {logout} =  useContext(AuthContext);
-
     if (isLoading)
     {
         return(
-            <Center  justifyContent='center' alignItems= "center">
+            <Center  flex = {1}>
                 <Spinner size="lg"/>
             </Center>
         )
@@ -59,58 +62,71 @@ const ViewTrip = ({
     return(
         <Center
             //flex={1}
-            //w= '100%'
+            w= '100%'
             bg='#E5E5E5'
         >
             {
-                /*<Button 
-                    title =  'logout' 
-                    onPress = {()=> logout()}
-                />*/
-            }   
-            { 
-                <Header 
-                    navigation={navigation} 
-                    showBackIcon = {true}
-                /> 
+                <ScrollView
+                    width= '100%'
+                    height= '100%'
+
+                    _contentContainerStyle={{
+                        px: "10px",
+                        pt: '2',
+                        w: '100%'
+                    }}
+                >
+                    {
+                        <TripComponent
+                            time = {time}
+                            company = {company}
+                            dateStamp = {date}
+                            id = {trip_id}
+                            tag = {tag}
+                            clickable={false}
+                            firstPassenger = {firstPassenger}
+                            status={status}
+                            total_distance={total_distance}
+                        />
+                    }
+                    {
+                        <StatusComponent 
+                            status = {status}
+                            trips = {trips}
+                            acceptTripAction = {acceptTripAction}
+                            onRouteAction = {onRouteAction}
+                            getPassengerAction = {getPassengerAction}
+                            passenger={passenger}
+                            passengerBound={passengerBound}
+                            passengerLocation={passengerLocation}
+                            passengerDestination={passengerDestination}
+                            passengerName={passengerName}
+                            passengerSurname={passengerSurname}
+                            trip_id = {trip_id}
+                            completeTripAction = {completeTripAction}
+                            endTripAction = {endTripAction}
+                            passengerIsLoading = {passengerIsLoading}
+                            declineTripAction = {declineTripAction}
+                            navigation = {navigation}
+                            skipTripAction = {skipTripAction}
+                        />
+                    }
+                    {
+                        <PassengersComponent 
+                            trips = {trips}
+                            order = {order}
+                            openCallDialogAction = {openCallDialogAction}
+                        />
+                    }
+                    {
+                        <MapComponent
+                            openInGoogeMapsAction = {openInGoogeMapsAction} 
+                        />
+                    }
+                    
+                </ScrollView>
             }
-            <ScrollView
-                _contentContainerStyle={{
-                    px: "10px",
-                    pt: '2',
-                    h: '95%'
-                }}
-            >
-                <TripComponent
-                    time = {time}
-                    company = {company}
-                    dateStamp = {date}
-                    id = {trip_id}
-                    tag = {tag}
-                    clickable={false}
-                /> 
-                <StatusComponent 
-                    status = {status}
-                    trips = {trips}
-                    acceptTripAction = {acceptTripAction}
-                    onRouteAction = {onRouteAction}
-                    getPassengerAction = {getPassengerAction}
-                    passenger={passenger}
-                    passengerBound={passengerBound}
-                    passengerLocation={passengerLocation}
-                    passengerDestination={passengerDestination}
-                    passengerName={passengerName}
-                    passengerSurname={passengerSurname}
-                    trip_id = {trip_id}
-                    completeTripAction = {completeTripAction}
-                    endTripAction = {endTripAction}
-                />
-                <PassengersComponent 
-                    trips = {trips}
-                    order = {order}
-                />
-                <MapComponent/>
-            </ScrollView>
+            
 
         </Center>
     )

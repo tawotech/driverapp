@@ -11,7 +11,7 @@ import { Pressable } from 'react-native';
 import RNMap from './RNMAP';
 
 const MapComponent = ({
-
+    openInGoogeMapsAction
 }) =>
 {
     return(
@@ -22,7 +22,9 @@ const MapComponent = ({
             py = '2'
             px = '2'
         >
-            <Pressable>
+            <Pressable
+                onPress={()=>openInGoogeMapsAction()}
+            >
                 <Center
                     borderRadius= '10'
                     borderColor='#ADABB0'
