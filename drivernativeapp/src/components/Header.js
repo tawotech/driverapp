@@ -12,7 +12,6 @@ import { Pressable } from 'react-native';
 
 const Header = ({navigation, showBackIcon} ) =>
 {
-    console.log(navigation);
     const onGoBack = () =>{
         navigation.navigate("trips");
     }
