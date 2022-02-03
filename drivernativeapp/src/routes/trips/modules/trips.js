@@ -13,7 +13,10 @@ const initialState = {
     completeTrips: [],
     incompleteTrips:[],
     vehicle: null,
-    isLoading: false
+    isLoading: false,
+    name: null,
+    surname: null,
+    startDate: null
 };
 
  /**
@@ -24,6 +27,9 @@ const {
     GET_GROUPED_TRIPS,
     TRIPS_IS_LOADING
 } = actionConstants;
+
+const MONTH_OF_THE_YEAR = ["Jan","Feb","Mar","Apr", "May", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
 
 /**
  * Actions
@@ -51,9 +57,14 @@ export const getGroupedTripsAction = () =>{
             }
         })
         .then(async (res)=>{
+            let startDate = new Date(res.data.current_user.started_date);
+            let formatedStartDate = `${MONTH_OF_THE_YEAR[startDate.getMonth()]} ${startDate.getFullYear()}`
             dispatch({
                 type: GET_GROUPED_TRIPS,
                 payload: {
+                    startDate: formatedStartDate,
+                    name: res.data.current_user.name,
+                    surname: res.data.current_user.surname,
                     vehicle: res.data.current_user.vehicle,
                     completeTrips: res.data.complete_trips,
                     incompleteTrips: res.data.incomplete_trips
@@ -73,6 +84,9 @@ export const getGroupedTripsAction = () =>{
  */
 function handleGetGroupedTrips (state,action){
     return update(state,{
+        startDate:{ $set: action.payload.startDate},
+        name:{ $set: action.payload.name},
+        surname:{ $set: action.payload.surname},
         vehicle:{ $set: action.payload.vehicle},
         completeTrips:{ $set: action.payload.completeTrips},
         incompleteTrips:{ $set: action.payload.incompleteTrips}

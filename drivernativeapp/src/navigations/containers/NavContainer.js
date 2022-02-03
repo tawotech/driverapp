@@ -9,7 +9,10 @@ import {
 } from '../modules/navigation'
 
 const mapStateToProps = (state) =>({
-    loginState: state.navigate
+    loginState: state.navigate,
+    name: state.trips.name,
+    surname: state.trips.surname,
+    startDate: state.trips.startDate
 });
 
 const mapActionCreators = {

@@ -24,7 +24,10 @@ const Navigation = ({
     loginState,
     logoutAction,
     loginAction,
-    retrieveTokenAction
+    retrieveTokenAction,
+    name,
+    surname,
+    startDate
 }) => {
     const authContext = useMemo(()=>({
         login:(email, password)=>{
@@ -39,7 +42,11 @@ const Navigation = ({
         return(
             <Drawer.Navigator
                 initialRouteName='trips'
-                drawerContent={(props)=> <CustomDrawerContent {...props} />}
+                drawerContent={(props)=> <CustomDrawerContent {...props} 
+                    surname = {surname} 
+                    name = {name} 
+                    startDate = {startDate}
+                    />}
                 screenOptions={{
                     drawerPosition:"right"
                 }}
@@ -61,8 +68,6 @@ const Navigation = ({
             retrieveTokenAction();
         }, 2000);
     },[]);
-
-    console.log(loginState.isLoading);
 
     if (loginState.isLoading)
     {

@@ -54,21 +54,21 @@ const Header = ({navigation, showBackIcon} ) =>
                 alt="Alternate Text"
             />
             
-                <Center
-                    position='absolute'
-                    right = '0'
-                    pr={5}
+            <Center
+                position='absolute'
+                right = '0'
+                pr={5}
+            >
+                <Pressable
+                    onPress={()=>openAppDrawer()}
                 >
-                    <Pressable
-                        onPress={()=>openAppDrawer()}
-                    >
-                        <HamburgerIcon 
-                            size = '8'
-                            color= '#ADABB0'
-                        />
-                    </Pressable>
+                    <HamburgerIcon 
+                        size = '8'
+                        color= '#ADABB0'
+                    />
+                </Pressable>
 
-                </Center>
+            </Center>
         </HStack>
         
     )

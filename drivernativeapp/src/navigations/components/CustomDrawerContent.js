@@ -14,13 +14,14 @@ import {
     HStack,
     Center,
     Pressable,
+    Image
 } from 'native-base'
 
-import Header from '../../components/Header';
 import { AuthContext } from '../../components/context';
+import { images } from '../../components/context';
 
 
-const CustomDrawerContent = () =>
+const CustomDrawerContent = ({name, surname, startDate}) =>
 {
     const {logout} =  useContext(AuthContext);
 
@@ -71,17 +72,40 @@ const CustomDrawerContent = () =>
                 borderTopWidth = '2'
                 borderColor = '#EEEDF0'
                 py = '10'
+                pl = '5'
+                justifyContent={"flex-start"}
+                alignItems={"center"}
             >
                 <Center
-                    pl ='10'
+                    alignItems={"center"}
+                    justifyContent={"center"}
                 >
-                    <Text>Icon</Text>
+                    <Image
+                        size={16}
+                        resizeMode={"contain"}
+                        source={images.ellipse}
+                        alt="Alternate Text"
+                    />
+                    <Image
+                        size={8}
+                        resizeMode={"contain"}
+                        source={images.useralt}
+                        alt="Alternate Text"
+                        position={'absolute'}
+                    />
                 </Center>
-                <Center
+                <View
                     pl ='5'
                 >
-                    <Text>Tawona Mushinga</Text>
-                </Center>
+                    <Text
+                        fontWeight={"bold"}
+                        fontSize={17}
+                    >{`${name} ${surname}`}</Text>
+                    <Text
+                        fontSize={12}
+                        color={'#ADABB0'}
+                    >{`Driver since ${startDate}`}</Text>
+                </View>
             </HStack>
         </SafeAreaView>
                    
