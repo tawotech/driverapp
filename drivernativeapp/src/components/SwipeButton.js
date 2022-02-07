@@ -1,6 +1,12 @@
 import { position } from "native-base/lib/typescript/theme/styled-system";
 import React, { useState } from "react";
-import { View,Text } from "native-base";
+import { View,
+    Text, 
+    Button,
+    Pressable, 
+    Center,
+    HamburgerIcon 
+} from "native-base";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, { Extrapolate, interpolate, runOnJS, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
@@ -12,11 +18,10 @@ const SWIPABALE_DIMENSIONS = BUTTON_HEIGHT - (2 * BUTTON_PADDING);
 
 const H_WAVE_RANGE = SWIPABALE_DIMENSIONS + 2 * BUTTON_PADDING;
 const H_SWIPE_RANGE = BUTTON_WIDTH - 2 * BUTTON_PADDING - SWIPABALE_DIMENSIONS;
-const ToggledStates = ["left", "center", "right" ]
 
-const SwipeButton = ({onToggle, status, leftText, rightText}) => {
-    const [toggled, setToggled] = useState(ToggledStates[1])
-    const X = useSharedValue(H_SWIPE_RANGE/2);
+const SwipeButton = ({onToggle, status, headingText}) => {
+    const [toggled, setToggled] = useState(false)
+    const X = useSharedValue(0);
 
     const handleComplete = (isToggled)=>{
         if(isToggled !== toggled)
@@ -32,17 +37,9 @@ const SwipeButton = ({onToggle, status, leftText, rightText}) => {
         },
         onActive:(e, ctx)=>{
             let newValue;
-            if(ctx.completed == ToggledStates[0]) // left
+            if(ctx.completed) // left
             {
                 newValue = e.translationX
-            }
-            else if(ctx.completed == ToggledStates[1]) // center
-            {
-                newValue = H_SWIPE_RANGE/2 + e.translationX
-            }
-            else if(ctx.completed == ToggledStates[2]) // right
-            {
-                newValue = H_SWIPE_RANGE + e.translationX
             }
             else
             {
@@ -55,101 +52,25 @@ const SwipeButton = ({onToggle, status, leftText, rightText}) => {
             }
         },
         onEnd:(e)=>{
-            if(X.value <= SWIPABALE_DIMENSIONS/2 + 10)
-            {
-                X.value = withSpring(0);
-                runOnJS(handleComplete)("left");
-            }
-            else if(X.value > (H_SWIPE_RANGE  - (SWIPABALE_DIMENSIONS/2) - 10))
+            if(X.value > H_SWIPE_RANGE - (SWIPABALE_DIMENSIONS/2) - 5)
             {
                 X.value = withSpring(H_SWIPE_RANGE);
-                runOnJS(handleComplete)("right");
+                runOnJS(handleComplete)(true);
             }
-            else{
-                X.value = withSpring(H_SWIPE_RANGE/2);
-                runOnJS(handleComplete)("center");
+            else
+            {
+                runOnJS(handleComplete)(false);
+                X.value = withSpring(0);
             }
         }
     });
-
-
-    const InterpolateXInput1 = [0, H_SWIPE_RANGE/2];
-    const InterpolateXInput2 = [H_SWIPE_RANGE/2,H_SWIPE_RANGE];
 
     const AnimatedStyles = {
         swipable: useAnimatedStyle(()=>{
             return {
                 transform: [{translateX: X.value}]
             }
-        }),
-        swipeTextAccept: useAnimatedStyle(()=>{
-            return {
-                opacity: interpolate(X.value, InterpolateXInput1,
-                    [
-                        0,0.8
-                    ],
-                    Extrapolate.CLAMP
-                ),
-                transform: [{
-                    translateX: interpolate(X.value -BUTTON_WIDTH/2 ,InterpolateXInput1,[
-                        SWIPABALE_DIMENSIONS + BUTTON_PADDING,
-                        BUTTON_WIDTH/2 - SWIPABALE_DIMENSIONS,
-                        Extrapolate.CLAMP
-                    ])
-                }]
-            }
-        }),
-        swipeTextDecline: useAnimatedStyle(()=>{
-            return {
-                opacity: interpolate(X.value, InterpolateXInput2,
-                    [
-                        0.8,0
-                    ],
-                    Extrapolate.CLAMP
-                ),
-                transform: [{
-                    translateX: interpolate(X.value - BUTTON_WIDTH/2,InterpolateXInput2,[
-                        BUTTON_WIDTH/2,
-                        BUTTON_WIDTH - SWIPABALE_DIMENSIONS + BUTTON_PADDING,
-                        Extrapolate.CLAMP
-                    ])
-                }]
-            }
-        }),
-        /*swipeTextOnDeclined: useAnimatedStyle(()=>{
-            return {
-                opacity: interpolate(X.value, InterpolateXInput1,
-                    [
-                        0.8,0
-                    ],
-                    Extrapolate.CLAMP
-                ),
-                transform: [{
-                    translateX: interpolate(X.value,InterpolateXInput1,[
-                        0,
-                        BUTTON_WIDTH/2 - SWIPABALE_DIMENSIONS,
-                        Extrapolate.CLAMP
-                    ])
-                }]
-            }
-        }),
-        swipeTextOnAccepted: useAnimatedStyle(()=>{
-            return {
-                opacity: interpolate(X.value, InterpolateXInput2,
-                    [
-                        0,0.8
-                    ],
-                    Extrapolate.CLAMP
-                ),
-                transform: [{
-                    translateX: interpolate(X.value,InterpolateXInput2,[
-                        0,
-                        BUTTON_WIDTH/2 - SWIPABALE_DIMENSIONS,
-                        Extrapolate.CLAMP
-                    ])
-                }]
-            }
-        })*/
+        })
     }
     return (
 
@@ -159,11 +80,10 @@ const SwipeButton = ({onToggle, status, leftText, rightText}) => {
             alignItems: "center"
         }}
     >
-
         <View
             style ={{
                 flexDirection: "row",
-                justifyContent: "space-between",
+                justifyContent: "center",
                 width: 100 + "%",
                 paddingHorizontal: 10,
                 paddingBottom: 10
@@ -173,27 +93,13 @@ const SwipeButton = ({onToggle, status, leftText, rightText}) => {
                 style = {[
                     {
                         alignSelf: "center",
-                        fontSize: 20,
+                        fontSize: 15,
                         fontWeight: "bold",
-                        color : "red",
+                        color : "gray",
                     },
-                    //AnimatedStyles.swipeTextAccept
                 ]}
             >
-                {leftText}
-            </Animated.Text>
-            <Animated.Text
-                style = {[
-                    {
-                        alignSelf: "center",
-                        fontSize: 20,
-                        fontWeight: "bold",
-                        color : "green",
-                    },
-                    //AnimatedStyles.swipeTextDecline
-                ]}
-            >
-                {rightText}
+                {headingText}
             </Animated.Text>
         </View>
 
@@ -228,78 +134,9 @@ const SwipeButton = ({onToggle, status, leftText, rightText}) => {
                             padding: 10
                         }
                     ]}
-                    
                 >
                 </Animated.View>
             </PanGestureHandler>
-            {
-                /*
-                
-                */
-            }
-            
-            {
-                /*
-                <View
-                style ={{
-                    height: BUTTON_HEIGHT,
-                    width: BUTTON_WIDTH,
-                    padding: BUTTON_PADDING,
-                    //display: 'flex',
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: BUTTON_HEIGHT,
-                    //backgroundColor: 'white',
-                    position: "absolute",
-                    zIndex: 2
-
-                }}
-            >
-                <Animated.Text
-                    style = {[
-                        {
-                            alignSelf: "center",
-                            fontSize: 20,
-                            fontWeight: "bold",
-                            color : "blue",
-                        },
-                        AnimatedStyles.swipeTextOnAccepted
-                    ]}
-                >
-                    Accepted
-                </Animated.Text>
-            </View>
-            <View
-                style ={{
-                    height: BUTTON_HEIGHT,
-                    width: BUTTON_WIDTH,
-                    padding: BUTTON_PADDING,
-                    //display: 'flex',
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: BUTTON_HEIGHT,
-                    //backgroundColor: 'white',
-                    position: "absolute",
-                    zIndex: 2
-
-                }}
-            >
-                <Animated.Text
-                    style = {[
-                        {
-                            alignSelf: "center",
-                            fontSize: 20,
-                            fontWeight: "bold",
-                            color : "blue",
-                        },
-                        AnimatedStyles.swipeTextOnDeclined
-                    ]}
-                >
-                    Declined
-                </Animated.Text>
-            </View>*/
-            }
-            
         </View>
     </View>
     )

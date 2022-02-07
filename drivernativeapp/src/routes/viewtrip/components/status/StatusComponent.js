@@ -13,13 +13,13 @@ import {
     Button,
     SectionList,
     ScrollView,
+    HamburgerIcon
   } from "native-base"
 
 
 import ConfirmationComponent from './confirmation/ConfirmationComponent'
 import EndTripComponent from './confirmation/EndTripComponent'
 import SwipeButton from '../../../../components/SwipeButton'
-import { declineTripAction } from '../../modules/viewTrip'
 
 const StatusComponent = ({
     status,
@@ -35,20 +35,13 @@ const StatusComponent = ({
     completeTripAction,
     endTripAction,
     passengerIsLoading,
-    declineTripAction,
-    navigation,
-    skipTripAction
+    onOptions
 }) =>
 {
-    const onPressAction = (status, next = null)=>{
-        console.log("status is: " + status + "toggle is: " + next)
-        if(status == 'scheduled' && next == 'right')
+    const onPressAction = (status, toggled = null)=>{
+        if(status == 'scheduled' && toggled == true)
         {
             acceptTripAction();
-        }
-        else if(status == "scheduled" && next == "left")
-        {
-            declineTripAction(navigation);
         }
         else if ( status == 'accepted')
         {
@@ -66,11 +59,30 @@ const StatusComponent = ({
         {
             display = 'Accept Trip';
             
-            return (<SwipeButton onToggle={onPressAction} 
-                        status = {status}
-                        leftText={"Decline"}
-                        rightText={"Accept"}
-                    />)
+            return (
+            <>
+                <Pressable
+                    position={"absolute"}
+                    right ={0}
+                    top = {0}
+                    mr = {2}
+                    mt = {2}
+                    onPress={()=>onOptions({
+                        type: "trip"
+                    })}
+                >
+                    <HamburgerIcon 
+                        size = '6'
+                        color= '#ADABB0'
+                    />
+                </Pressable>
+                <SwipeButton
+                    onToggle={onPressAction} 
+                    status = {status}
+                    headingText = {"Swip right to accept trip"}
+                />
+            </>
+            )
         }
         else if ( status == 'accepted')
         {
@@ -124,7 +136,7 @@ const StatusComponent = ({
                     passengerSurname={passengerSurname}
                     completeTripAction={completeTripAction}
                     passengerIsLoading = {passengerIsLoading}
-                    skipTripAction = {skipTripAction}
+                    onOptions={onOptions}
                 />
             }
             {

@@ -17,6 +17,7 @@ import ViewTripContainer from '../../routes/viewtrip/containers/ViewTripContaine
 import { colorTheme } from '../../components/context';
 import CustomDrawerContent from './CustomDrawerContent';
 import Header from '../../components/Header';
+import TermsAndConditionsContainer from '../../routes/termsandconditions/containers/TermsAndConditionsContainer';
 const theme = extendTheme({colors: colorTheme});
 
 
@@ -59,6 +60,8 @@ const Navigation = ({
                         header: props => <Header {...props}/>
                     }} 
                 />
+                
+                
             </Drawer.Navigator>
         );
     }
@@ -109,9 +112,31 @@ const Navigation = ({
                                     component = {ViewTripContainer}
                                     options = {{
                                         headerShown:true,
-                                        header: props => <Header navigation={props.navigation} showBackIcon={true}/>
+                                        header: props => <Header {...props} showBackIcon={true} />
                                     }}
                                 />
+                                {
+                                    <MainStack.Screen 
+                                        name = 'terms' 
+                                        component = {TermsAndConditionsContainer}
+                                        options = {{
+                                            headerShown:true,
+                                            header: props => <Header {...props} showBackIcon={true} />
+                                        }}
+                                    />
+                                }
+                                {
+                                    /*<MainStack.Screen 
+                                        name = 'viewTrip' 
+                                    name = 'viewTrip' 
+                                        name = 'viewTrip' 
+                                        component = {ViewTripContainer}
+                                        options = {{
+                                            headerShown:true,
+                                            header: props => <Header navigation={props.navigation} showBackIcon={true}/>
+                                        }}
+                                    />*/
+                                }
                             </MainStack.Navigator>
                         }
                     </NativeBaseProvider>

@@ -5,7 +5,8 @@ import {
     VStack,
     Pressable,
     Center,
-    Spinner
+    Spinner,
+    HamburgerIcon
 } from "native-base"
 import SwipeButton from '../../../../../components/SwipeButton'
 
@@ -20,18 +21,13 @@ const ConfirmationComponent = ({
     completeTripAction,
     passengerIsLoading,
     status,
-    skipTripAction
+    onOptions
 }) =>
 {
     const onPressAction = (status,isToggled) =>{
-        console.log(isToggled);
-        if(isToggled == "right")
+        if(isToggled == true)
         {
             completeTripAction();
-        }
-        else if(isToggled == "left")
-        {
-            skipTripAction();
         }
     }
 
@@ -58,7 +54,9 @@ const ConfirmationComponent = ({
                 color= 'green.700'
             >On route to:
             </Text>
-            <Text>{` ${passengerBound == 'inbound' ? passengerLocation : passengerDestination}`}</Text>
+            <Text
+                isTruncated
+            >{` ${passengerBound == 'inbound' ? passengerLocation : passengerDestination}`}</Text>
             {
                 <Text
                     color= 'green.700'
@@ -74,29 +72,32 @@ const ConfirmationComponent = ({
                 >
                     <SwipeButton onToggle={onPressAction} 
                         status = {status}
-                        leftText={"Skip"}
-                        rightText={passengerBound == 'inbound' ? 'Confirm pickup' : 'Confirm dropoff'}
+                        headingText={passengerBound == 'inbound' ? 'Swipe right to confirm pickup' : 'Swipe right to confirm dropoff'}
                     />
                 </Center>
-                
-                /*
-                <Pressable
-                    onPress={()=>completeTripAction()}
-                >
-                    <Box
-                        bg={'green.700'}
-                        py='2'
-                        px='2'
-                        borderRadius='10'
-                        marginTop='3'
-                    >
-                        <Text
-                            color= 'white'
-                            fontWeight='bold'
-                        >{passengerBound == 'inbound' ? 'Confirm pickup' : 'Confirm dropoff'}</Text>
-                    </Box>
-                </Pressable>*/
             }
+            <Center
+                position='absolute'
+                right = '0'
+                pr={2}
+                pt={1}
+            >
+                <Pressable
+                    onPress={()=>onOptions({
+                        type: "passenger",
+                        name: passengerName,
+                        surname: passengerSurname,
+                        location: passengerLocation,
+                        destination: passengerDestination
+                    })}
+                >
+                    <HamburgerIcon 
+                        size = '6'
+                        color= '#ADABB0'
+                    />
+                </Pressable>
+
+            </Center>
         </VStack>
     )
 

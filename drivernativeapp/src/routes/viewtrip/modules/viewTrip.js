@@ -124,7 +124,6 @@ export function getTripDataAction(id)
             }
         })
         .then(async (res)=>{
-            console.log(res);
             dispatch({
                 type: GET_TRIP_DATA,
                 payload: {
@@ -337,7 +336,6 @@ export function completeTripAction()
         }
         )
         .then(async (res)=>{
-            console.log(res.data);
 
             let passenger =  res.data.passenger;
             let passengerStatus = res.data.passenger_status;
@@ -378,7 +376,6 @@ export function skipTripAction()
         }
         )
         .then(async (res)=>{
-            console.log(res.data);
 
             let passenger =  res.data.passenger;
             let passengerStatus = res.data.passenger_status;
@@ -417,7 +414,6 @@ export function endTripAction()
         }
         )
         .then(async (res)=>{
-            console.log(res.data);
 
             let status = res.data.status;
 
@@ -443,8 +439,6 @@ export function openInGoogeMapsAction()
         let order = store().viewTrip.order;
         let bound = trips[0].trip_type;
 
-        console.log(order.split(","));
-
         let route = order.split(",").map((id,index)=>{
             let trip = trips.filter((trip)=>(trip.id == id));
             if(bound == "inbound") return (`${trip[0].location_latitude},${trip[0].location_longitude}`);
@@ -467,7 +461,6 @@ export function openInGoogeMapsAction()
         const scheme = Platform.OS === 'ios' ? 'maps:0,0?q=' : 'https://www.google.com/maps/dir/?api=1';     
 
         let wayLatLng = route.join('|');
-        console.log(wayLatLng);
 
         const url = Platform.select({
           ios: `${scheme}@${destLatLng}`,

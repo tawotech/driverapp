@@ -4,13 +4,17 @@ import {
     Box,
     ScrollView,
     Spinner,
-    Center
+    Center,
+    Text,
+    Pressable,
+    VStack
   } from "native-base"
 
 import TripComponent from '../../trips/components/TripComponent';
 import PassengersComponent from './passengers/PassengersComponent';
 import MapComponent from './maps/MapComponent';
 import StatusComponent from './status/StatusComponent'
+import Options from './options/Options';
 
 const ViewTrip = ({
     navigation,
@@ -42,9 +46,32 @@ const ViewTrip = ({
     openCallDialogAction,
     firstPassenger,
     declineTripAction,
-    skipTripAction
+    skipTripAction,
 }) =>
 {
+
+    const [showOptions, setShowOptions] = useState(false);
+    const [optionsData, setOptionsData] = useState({});
+
+
+    const onOptions = (data) =>{
+        // toggle show options
+        setOptionsData(data);
+        setShowOptions(true);
+    }
+
+    const onCancel = (data) =>{
+        setShowOptions(false);
+        if(data.type == "passenger")
+        {
+            skipTripAction();
+        }
+        else if (data.type == "trip")
+        {
+            declineTripAction(navigation);
+        }
+    }
+
     const { tripId }  = route.params; 
     useEffect(()=>{
         getTripDataAction(tripId);
@@ -106,9 +133,8 @@ const ViewTrip = ({
                             completeTripAction = {completeTripAction}
                             endTripAction = {endTripAction}
                             passengerIsLoading = {passengerIsLoading}
-                            declineTripAction = {declineTripAction}
                             navigation = {navigation}
-                            skipTripAction = {skipTripAction}
+                            onOptions={onOptions}
                         />
                     }
                     {
@@ -125,9 +151,16 @@ const ViewTrip = ({
                     }
                     
                 </ScrollView>
-            }
-            
 
+            }
+            {
+                showOptions && 
+                <Options 
+                    optionsData={optionsData} 
+                    setShowOptions={setShowOptions}
+                    onCancel = {onCancel}
+                />
+            }
         </Center>
     )
 }

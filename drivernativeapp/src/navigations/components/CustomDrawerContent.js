@@ -21,7 +21,7 @@ import { AuthContext } from '../../components/context';
 import { images } from '../../components/context';
 
 
-const CustomDrawerContent = ({name, surname, startDate}) =>
+const CustomDrawerContent = ({name, surname, startDate,navigation}) =>
 {
     const {logout} =  useContext(AuthContext);
 
@@ -36,7 +36,11 @@ const CustomDrawerContent = ({name, surname, startDate}) =>
                 <Center
                     marginTop = '10'
                 >
-                    <Pressable>
+                    <Pressable
+                        onPress={()=>{
+                            navigation.navigate("trips");
+                        }}
+                    >
                         <Text
                             fontSize = {20}
                             fontWeight = "bold"
@@ -48,11 +52,17 @@ const CustomDrawerContent = ({name, surname, startDate}) =>
                 <Center
                     marginTop ={5}
                 >
-                    <Text
-                        fontSize = {20}
-                        fontWeight = "bold"
-                        color ='#535156'
-                    >Terms and Conditions</Text>
+                    <Pressable
+                        onPress={()=>{
+                            navigation.navigate("terms");
+                        }}
+                    >
+                        <Text
+                            fontSize = {20}
+                            fontWeight = "bold"
+                            color ='#535156'
+                        >Terms and Conditions</Text>
+                    </Pressable>
                 </Center>
                 <Center
                     marginTop ={5}
