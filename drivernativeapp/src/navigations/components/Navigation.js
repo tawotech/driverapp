@@ -60,8 +60,6 @@ const Navigation = ({
                         header: props => <Header {...props}/>
                     }} 
                 />
-                
-                
             </Drawer.Navigator>
         );
     }

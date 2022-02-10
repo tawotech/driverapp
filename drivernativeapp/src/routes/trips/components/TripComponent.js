@@ -25,7 +25,8 @@ const TripComponent = ({
     clickable,
     firstPassenger,
     status,
-    total_distance
+    total_distance,
+    numPassengers
 }) =>{
 
     const [dateMonth,setDateMonth] = useState({
@@ -117,19 +118,30 @@ const TripComponent = ({
                             fontWeight='bold'
                         >{total_distance}</Text>
                     </Box>
+                    {
+                        /*<Box pt = '2'>
+                            <Text
+                                color='#ADABB0'   
+                            >REF NUMBER</Text>
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{tag}</Text>
+                        </Box>*/ 
+                    }
                     <Box pt = '2'>
                         <Text
                             color='#ADABB0'   
-                        >REF NUMBER</Text>
+                        >NUMBER OF PASSENGERS</Text>
                         <Text
                             color='#535156'
                             fontWeight='bold'
-                        >{tag}</Text>
+                        >{numPassengers}</Text>
                     </Box>
                     <Box pt = '2'>
                         <Text
                             color='#ADABB0'   
-                        >PASSENGER</Text>
+                        >FIRST PASSENGER</Text>
                         <Text
                             color='#535156'
                             fontWeight='bold'

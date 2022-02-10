@@ -11,7 +11,8 @@
  // login initial state
 const initialState = {
     isLoading: true,
-    userToken: null
+    userToken: null,
+    fcmToken: null,
 };
 
  /**
@@ -21,7 +22,8 @@ const initialState = {
 const {
     LOGIN,
     LOGOUT,
-    RETRIEVE_TOKEN
+    RETRIEVE_TOKEN,
+    SAVE_FCM_TOKEN,
 } = actionConstants;
 
 const {url} = apiConstants;
@@ -87,6 +89,34 @@ export const logoutAction = () =>{
     }
 }
 
+export const saveFcmTokenAction = ({token})=>{
+    return async (dispatch, store)=>{
+        let fcmToken = '';
+        try{
+            await AsyncStorage.setItem('fcmToken',token);
+        }
+        catch(e){
+            console.log(e);
+        }
+
+        try{
+            fcmToken = await AsyncStorage.getItem('fcmToken');
+        }
+        catch(e){
+            console.log(e);
+        }
+
+        dispatch({
+            type: SAVE_FCM_TOKEN,
+            payload:{
+                fcmToken
+            }
+        });
+    }
+}
+
+
+
 export const retrieveTokenAction = (userToken) =>{
 
     return async (dispatch, store)=>{
@@ -135,10 +165,17 @@ function handleRetrieveToken(state, action)
     })
 }
 
+function handleSaveFcmToken(state, action)
+{
+    return update( state,{
+        fcmToken: { $set: action.payload.fcmToken } ,
+    })
+}
 const ACTION_HANDLERS = {
     LOGIN: handleLogin,
     LOGOUT: handleLogout,
-    RETRIEVE_TOKEN: handleRetrieveToken
+    RETRIEVE_TOKEN: handleRetrieveToken,
+    SAVE_FCM_TOKEN: handleSaveFcmToken,
 }
 
 export function NavigationReducer (state = initialState, action){

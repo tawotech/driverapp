@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "435032339395",
+    "project_id": "etapath-driver-app",
+    "storage_bucket": "etapath-driver-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435032339395:android:aec6ef614abd4048148376",
+        "android_client_info": {
+          "package_name": "com.drivernativeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "435032339395-4us7enkkmioqm31f22gk7l51vlsmhf4g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQvW3myIVEnaNjRdMHLIBSpB6Gsv-JOQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "435032339395-4us7enkkmioqm31f22gk7l51vlsmhf4g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

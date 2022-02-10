@@ -33,7 +33,8 @@ const mapStateToProps = (state) =>({
     passengerDestination: state.viewTrip.passengerDestination,
     passengerName: state.viewTrip.passengerName,
     passengerSurname: state.viewTrip.passengerSurname,
-    firstPassenger: state.viewTrip.firstPassenger
+    firstPassenger: state.viewTrip.firstPassenger,
+    distanceTravelled: state.viewTrip.distanceTravelled
 });
 
 const mapActionCreators = {

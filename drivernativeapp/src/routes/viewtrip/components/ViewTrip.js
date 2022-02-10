@@ -47,6 +47,7 @@ const ViewTrip = ({
     firstPassenger,
     declineTripAction,
     skipTripAction,
+    distanceTravelled
 }) =>
 {
 
@@ -114,6 +115,7 @@ const ViewTrip = ({
                             firstPassenger = {firstPassenger}
                             status={status}
                             total_distance={total_distance}
+                            numPassengers={trips.length}
                         />
                     }
                     {
@@ -149,6 +151,22 @@ const ViewTrip = ({
                             openInGoogeMapsAction = {openInGoogeMapsAction} 
                         />
                     }
+                    <Box
+                        borderRadius='10'
+                        bg ='#FFFFFF'
+                        marginBottom='2'
+                        py={5}
+                        pl={5}
+                    >
+                        <Text
+                            //color='#ADABB0'
+                        >{`Distance Travelled: `}
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{`${distanceTravelled/1000} km`}</Text>
+                        </Text>
+                    </Box>
                     
                 </ScrollView>
 

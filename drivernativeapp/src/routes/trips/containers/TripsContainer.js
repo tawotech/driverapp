@@ -3,7 +3,8 @@ import Trips from '../components/Trips'
 
 // the module folder will contain all actions related to the home page
 import { 
-    getGroupedTripsAction
+    getGroupedTripsAction,
+    assignFcmTokenAction
 } from '../modules/trips'
 
 const mapStateToProps = (state) =>({
@@ -14,7 +15,8 @@ const mapStateToProps = (state) =>({
 });
 
 const mapActionCreators = {
-    getGroupedTripsAction
+    getGroupedTripsAction,
+    assignFcmTokenAction
 };
 
 export default connect (mapStateToProps,mapActionCreators)(Trips); 

@@ -25,9 +25,16 @@ const Trips = ({
     completeTrips,
     incompleteTrips,
     vehicle,
-    isLoading
+    isLoading,
+    assignFcmTokenAction
 }) =>
 {
+
+    useEffect(()=>{
+        // assign fcm token, login successful
+        assignFcmTokenAction();
+    },[]);
+
     useFocusEffect(
         React.useCallback(()=>{
             getGroupedTripsAction();
@@ -40,14 +47,14 @@ const Trips = ({
         });
     }
 
-    if(isLoading == true)
+    /*if(isLoading == true)
     {
         return(
             <Center flex = {1}>
                 <Spinner size="large"/>
             </Center>
         )
-    }
+    }*/
 
     return(
         <Box
@@ -83,6 +90,7 @@ const Trips = ({
                             firstPassenger = {item.first_passenger}
                             status = {item.status}
                             total_distance={item.total_distance}
+                            numPassengers = { item.num_trips}
                         />
                     )
                    
@@ -96,7 +104,8 @@ const Trips = ({
                         >{title}</Heading>
                     </Center>
                 )}
-
+                refreshing={isLoading}
+                onRefresh={()=>getGroupedTripsAction()}
             >
             </SectionList>
         </Box>

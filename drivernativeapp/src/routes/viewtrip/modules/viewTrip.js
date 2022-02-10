@@ -6,11 +6,14 @@
  import actionConstants from './actionConstants'
  import axios from 'axios';
  import apiConstants from '../../../api/apiConstants'
- import { Linking, Alert } from 'react-native';
+ import { Linking, Alert, PermissionsAndroid } from 'react-native';
  import PushNotification from 'react-native-push-notification'
+ import { getDistance } from 'geolib';
+ import Geolocation from 'react-native-geolocation-service';
+ 
 
 
- const {url} = apiConstants;
+const {url} = apiConstants;
  // login initial state
 const initialState = {
     tag: null,
@@ -33,7 +36,10 @@ const initialState = {
     contactToCall: null,
     firstPassenger: null,
     passengerIsLoading: true,
-    isLoading: true
+    isLoading: true,
+    currentLocation: null,
+    prevLocation: null,
+    distanceTravelled: 0
 }
 
  /**
@@ -52,7 +58,10 @@ const {
     VIEW_TRIP_IS_LOADING,
     PASSENGER_IS_LOADING,
     DECLINE_TRIP,
-    SKIP_TRIP
+    SKIP_TRIP,
+    SET_LOCATIONS,
+    GET_INITIAL_LOCATION,
+    CALCULATE_DISTANCE_TRAVELLED
 } = actionConstants;
 const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
@@ -147,7 +156,59 @@ export function getTripDataAction(id)
             }
 
             //handleNotification(res.data.date,res.data.time);
+            // inititilise location tracking
+            try {
+                let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+                if (permited == false)
+                {
+                    const granted = await PermissionsAndroid.request( 
+                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+                    );
+                }
 
+                permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+
+                if( permited == true ) 
+                {
+                    Geolocation.getCurrentPosition(
+                        (success)=>{
+                            const { latitude, longitude } = success.coords;
+                            dispatch(getInitialLocation({latitude,longitude}));
+                        },
+                        (error)=>{
+                            console.log(error);
+                        },
+                        {
+                            enableHighAccuracy: true, 
+                            distanceFilter: 50,
+                            forceLocationManager: true,
+                        }
+                    );
+
+                    Geolocation.watchPosition(
+                        (success)=>{
+                            const { latitude, longitude } = success.coords;
+                            dispatch(setLocations({latitude, longitude}));
+                        },
+                        (error)=>{
+                            console.log(error);
+                        },
+                        {   
+                            enableHighAccuracy: true, 
+                            distanceFilter: 50,
+                            forceLocationManager: true,
+                            interval: 100
+                        }
+                    );
+                }
+                else
+                {
+                    console.log("Device location access required");
+                }
+                
+            } catch (error) {
+                console.log(error);
+            }
         })
         .catch((e)=>{
             console.log(e);
@@ -423,6 +484,8 @@ export function endTripAction()
                     status
                 }
             });
+            // stop observing
+            Geolocation.stopObserving();
         })
         .catch((e)=>{
             console.log(e);
@@ -514,6 +577,62 @@ export function openCallDialogAction(contact)
                 })
             }
         });
+    }
+}
+
+export function setLocations(currentLocation)
+{
+    return (dispatch, store)=>
+    {
+        prevLocation = store().viewTrip.currentLocation;
+        console.log("prev: " + prevLocation.latitude +"," + prevLocation.longitude + " current: " + currentLocation.latitude + "," + currentLocation.longitude);
+
+       dispatch({
+            type: SET_LOCATIONS,
+            payload:{
+                currentLocation,
+                prevLocation
+            }
+       });
+
+       dispatch(calculateDistanceTravelled());
+    }
+}
+
+export function getInitialLocation(location)
+{
+    return (dispatch, store)=>
+    {
+       dispatch({
+            type: GET_INITIAL_LOCATION,
+            payload:{
+                currentLocation: location,
+                prevLocation: location,
+                distanceTravelled: 0
+            }
+       })
+    }
+}
+
+export function calculateDistanceTravelled()
+{
+    return async (dispatch, store)=>
+    {
+
+        const { distanceTravelled, prevLocation, currentLocation } = store().viewTrip;
+        //console.log("prev: " + prevLocation.latitude +"," + prevLocation.longitude + " current: " + currentLocation.latitude + "," + currentLocation.longitude);
+        const pointToPointDist = await getDistance(prevLocation,currentLocation); 
+
+        let newDistanceTravelled = distanceTravelled + pointToPointDist;
+
+        console.log(newDistanceTravelled);
+
+       dispatch({
+            type: CALCULATE_DISTANCE_TRAVELLED,
+            payload:{
+                distanceTravelled: newDistanceTravelled
+            }
+       })
     }
 }
 
@@ -616,6 +735,28 @@ function handlePassengerIsLoading (state,action){
         passengerIsLoading:{ $set: action.payload.passengerIsLoading}
     })
 }
+
+
+function handleSetLocations (state,action){
+    return update(state,{
+        prevLocation:{ $set: action.payload.prevLocation},
+        currentLocation:{ $set: action.payload.currentLocation},
+    })
+}
+
+function handleGetInitialLocation (state,action){
+    return update(state,{
+        prevLocation:{ $set: action.payload.prevLocation},
+        currentLocation:{ $set: action.payload.currentLocation},
+    })
+}
+
+function handleCalculateDistanceTravelled (state,action){
+    return update(state,{
+        distanceTravelled:{ $set: action.payload.distanceTravelled},
+    })
+}
+
 const ACTION_HANDLERS = {
     GET_TRIP_DATA: handleGetTripData,
     ACCEPT_TRIP: handleAcceptTrip,
@@ -627,7 +768,10 @@ const ACTION_HANDLERS = {
     VIEW_TRIP_IS_LOADING: handleIsLoading,
     PASSENGER_IS_LOADING: handlePassengerIsLoading,
     DECLINE_TRIP: handleDeclineTrip,
-    SKIP_TRIP: handleSkipTrip
+    SKIP_TRIP: handleSkipTrip,
+    SET_LOCATIONS: handleSetLocations,
+    GET_INITIAL_LOCATION: handleGetInitialLocation,
+    CALCULATE_DISTANCE_TRAVELLED: handleCalculateDistanceTravelled
 }
 
 export function ViewTripReducer (state = initialState, action){
