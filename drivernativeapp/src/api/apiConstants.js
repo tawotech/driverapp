@@ -1,3 +1,3 @@
 export default{
-    url:'10.0.0.100:3000/api/v1' 
+    url:'etapath-stage.herokuapp.com/api/v1' 
 }

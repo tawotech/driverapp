@@ -39,7 +39,8 @@ const initialState = {
     isLoading: true,
     currentLocation: null,
     prevLocation: null,
-    distanceTravelled: 0
+    distanceTravelled: 0,
+    startCalculatingDistance: false
 }
 
  /**
@@ -61,7 +62,8 @@ const {
     SKIP_TRIP,
     SET_LOCATIONS,
     GET_INITIAL_LOCATION,
-    CALCULATE_DISTANCE_TRAVELLED
+    CALCULATE_DISTANCE_TRAVELLED,
+    START_CALCULATING_DISTANCE
 } = actionConstants;
 const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
@@ -88,7 +90,10 @@ const handleNotification = (date,time) =>{
         message: `You have a trip booked for ${notifDate.getDate()}/${MONTH_OF_THE_YEAR[notifDate.getMonth()]}/${notifDate.getFullYear()} at ${time}, get ready!`,
         date: new Date(Date.now() + 10 * 1000),
         //date: notifDate,
-        allowWhileIdle: true
+        allowWhileIdle: true,
+        data: {
+        openedInForeground: true
+        }
     })
 }
 
@@ -170,25 +175,15 @@ export function getTripDataAction(id)
 
                 if( permited == true ) 
                 {
-                    Geolocation.getCurrentPosition(
-                        (success)=>{
-                            const { latitude, longitude } = success.coords;
-                            dispatch(getInitialLocation({latitude,longitude}));
-                        },
-                        (error)=>{
-                            console.log(error);
-                        },
-                        {
-                            enableHighAccuracy: true, 
-                            distanceFilter: 50,
-                            forceLocationManager: true,
-                        }
-                    );
-
                     Geolocation.watchPosition(
                         (success)=>{
-                            const { latitude, longitude } = success.coords;
-                            dispatch(setLocations({latitude, longitude}));
+                            const startCalculatingDistance = store().viewTrip.startCalculatingDistance;
+                            console.log("distance calculation status: " + startCalculatingDistance);
+                            if(startCalculatingDistance == true)
+                            { 
+                                const { latitude, longitude } = success.coords;
+                                dispatch(setLocations({latitude, longitude}));
+                            }
                         },
                         (error)=>{
                             console.log(error);
@@ -370,8 +365,7 @@ export function getPassengerAction()
 
             setTimeout(()=>{
                 dispatch(passengerIsLoadingAction(false));
-            },250);
-
+            },100);
         })
         .catch((e)=>{
             console.log(e);
@@ -409,9 +403,14 @@ export function completeTripAction()
                 }
             });
 
-            setTimeout(()=>{
-                dispatch(getPassengerAction());
-            },250);
+            dispatch(getPassengerAction());
+
+            const startCalculatingDistance = store().viewTrip.startCalculatingDistance;
+            if(startCalculatingDistance == false)
+            {
+                console.log("starting distance calculation");
+                dispatch(startCalculatingDistanceAction());
+            }
         })
         .catch((e)=>{
             console.log(e);
@@ -464,9 +463,11 @@ export function endTripAction()
     return (dispatch, store)=>
     {
         const trip_id = store().viewTrip.trip_id;
+        const total_distance = (store().viewTrip.distanceTravelled/1000);
         axios.post(`http://${url}/api_grouped_trips/complete`,
         {
             id: trip_id,
+            total_distance: total_distance + " km"  
         },
         {
             headers:{
@@ -481,7 +482,8 @@ export function endTripAction()
             dispatch({
                 type: END_TRIP,
                 payload: {
-                    status
+                    status,
+                    startCalculatingDistance: false
                 }
             });
             // stop observing
@@ -636,6 +638,34 @@ export function calculateDistanceTravelled()
     }
 }
 
+export function startCalculatingDistanceAction()
+{
+    return (dispatch, store)=>
+    {
+        Geolocation.getCurrentPosition(
+            (success)=>{
+                const { latitude, longitude } = success.coords;
+                dispatch(getInitialLocation({latitude,longitude}));
+                console.log("dispatching start distance calculation");
+                dispatch({
+                    type: START_CALCULATING_DISTANCE,
+                    payload:{
+                        startCalculatingDistance: true,
+                    }
+               })
+            },
+            (error)=>{
+                console.log(error);
+            },
+            {
+                enableHighAccuracy: true, 
+                distanceFilter: 50,
+                forceLocationManager: true,
+            }
+        );
+    }
+}
+
 /**
  * Action handlers
  */
@@ -710,6 +740,7 @@ function handleEndTrip(state,action)
 {
     return update(state,{
         status: { $set: action.payload.status },
+        startCalculatingDistance: { $set: action.payload.startCalculatingDistance}
     });
 }
 
@@ -757,6 +788,14 @@ function handleCalculateDistanceTravelled (state,action){
     })
 }
 
+function handleStartCalculatingDistance (state,action){
+    console.log("payload is: " + action.payload.startCalculatingDistance)
+
+    return update(state,{
+        startCalculatingDistance:{ $set: action.payload.startCalculatingDistance},
+    })
+}
+
 const ACTION_HANDLERS = {
     GET_TRIP_DATA: handleGetTripData,
     ACCEPT_TRIP: handleAcceptTrip,
@@ -771,7 +810,8 @@ const ACTION_HANDLERS = {
     SKIP_TRIP: handleSkipTrip,
     SET_LOCATIONS: handleSetLocations,
     GET_INITIAL_LOCATION: handleGetInitialLocation,
-    CALCULATE_DISTANCE_TRAVELLED: handleCalculateDistanceTravelled
+    CALCULATE_DISTANCE_TRAVELLED: handleCalculateDistanceTravelled,
+    START_CALCULATING_DISTANCE: handleStartCalculatingDistance
 }
 
 export function ViewTripReducer (state = initialState, action){

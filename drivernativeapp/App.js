@@ -14,21 +14,26 @@ import {
 
 import PushNotification from "react-native-push-notification";
 import { getGroupedTripsAction } from './src/routes/trips/modules/trips';
+import {Alert} from 'react-native'
 
 const initialState = window.__INITIAL_STATE__;
 const store = createStore (initialState);
 const {dispatch} = store;
 
 const handleNotification = (notification) =>{
-  if (notification.foreground == true)
+  console.log(notification)
+  if (notification.foreground == true && !notification.data.hasOwnProperty("openedInForeground"))
   {
     PushNotification.localNotificationSchedule({
       channelId: "app-channel",
       title: notification.title,
       message: notification.message,
       date: new Date(Date.now()),
-      allowWhileIdle: true,
-      userInteraction: false
+      data: {
+        openedInForeground: true
+      }
+      //allowWhileIdle: true,
+      //userInteraction: false
     })
   }
   dispatch(getGroupedTripsAction());
@@ -46,10 +51,10 @@ PushNotification.configure({
   onAction: function (notification) {
     console.log("NOTIFICATION ACTION:", notification);
 
-    if (notification.foreground == false)
+    /*if (notification.foreground == false)
     {
       dispatch(getGroupedTripsAction());
-    }
+    }*/
   },
  requestPermissions: Platform.OS === 'ios',
 });
@@ -58,7 +63,11 @@ PushNotification.configure({
 axios.interceptors.response.use(response=>{
   return response;
 },error=>{
-  const {status} = error.response;
+  Alert.alert("message: " + error.message + "status: " + error.status + "name : " + error.name );
+  //console.log("error: "+ JSON.stringify(error));
+  //console.log("response" + JSON.stringify(error.response.status))
+
+  const {status} = error;
   if(status == 401) // unauthorized
   {
     dispatch(logoutAction());
