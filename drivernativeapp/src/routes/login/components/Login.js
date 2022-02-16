@@ -32,7 +32,7 @@ const Login = ({navigation}) =>
     },[]);
 
     const [data, setData] = useState({
-        email: 'tawomusash@gmail.com',
+        email: 'tawomusash2@gmail.com',
         password: 'Musash8606'
     })
     const {login} = useContext(AuthContext);    

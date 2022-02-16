@@ -11,7 +11,8 @@ import {
     openInGoogeMapsAction,
     openCallDialogAction,
     declineTripAction,
-    skipTripAction
+    skipTripAction,
+    allTripsOnRouteAction
 } from '../modules/viewTrip'
 
 const mapStateToProps = (state) =>({
@@ -34,7 +35,8 @@ const mapStateToProps = (state) =>({
     passengerName: state.viewTrip.passengerName,
     passengerSurname: state.viewTrip.passengerSurname,
     firstPassenger: state.viewTrip.firstPassenger,
-    distanceTravelled: state.viewTrip.distanceTravelled
+    distanceTravelled: state.viewTrip.distanceTravelled,
+    allTripsOnRoute: state.viewTrip.allTripsOnRoute
 });
 
 const mapActionCreators = {
@@ -47,7 +49,8 @@ const mapActionCreators = {
     openInGoogeMapsAction,
     openCallDialogAction,
     declineTripAction,
-    skipTripAction
+    skipTripAction,
+    allTripsOnRouteAction
 };
 
 export default connect (mapStateToProps,mapActionCreators)(ViewTrip); 

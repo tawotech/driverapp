@@ -40,7 +40,8 @@ const initialState = {
     currentLocation: null,
     prevLocation: null,
     distanceTravelled: 0,
-    startCalculatingDistance: false
+    startCalculatingDistance: false,
+    allTripsOnRoute: "false",
 }
 
  /**
@@ -63,7 +64,8 @@ const {
     SET_LOCATIONS,
     GET_INITIAL_LOCATION,
     CALCULATE_DISTANCE_TRAVELLED,
-    START_CALCULATING_DISTANCE
+    START_CALCULATING_DISTANCE,
+    ALL_TRIPS_ON_ROUTE
 } = actionConstants;
 const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
@@ -150,7 +152,8 @@ export function getTripDataAction(id)
                     total_distance: res.data.total_distance,
                     order: res.data.order,
                     trips: res.data.trips,
-                    firstPassenger: res.data.first_passenger
+                    firstPassenger: res.data.first_passenger,
+                    allTripsOnRoute: res.data.all_trips_on_route
                 }
             });
 
@@ -327,7 +330,8 @@ export function getPassengerAction()
         .then(async (res)=>{
 
             let passenger = res.data.passenger;
-            let status = res.data.status
+            let status = res.data.status;
+            let allTripsOnRoute = res.data.all_trips_on_route
             
             if(status == 'trips_completed' || passenger == null)
             {
@@ -341,6 +345,7 @@ export function getPassengerAction()
                         passengerLocation: null,
                         passengerDestination: null,
                         passengerBound: null,
+                        allTripsOnRoute,
                         status
                     }
                 });
@@ -358,6 +363,7 @@ export function getPassengerAction()
                         passengerLocation: trip[0].location,
                         passengerDestination: trip[0].destination,
                         passengerBound: trip[0].trip_type,
+                        allTripsOnRoute,
                         status
                     }
                 });
@@ -463,11 +469,11 @@ export function endTripAction()
     return (dispatch, store)=>
     {
         const trip_id = store().viewTrip.trip_id;
-        const total_distance = (store().viewTrip.distanceTravelled/1000);
+        const actual_total_distance = (store().viewTrip.distanceTravelled/1000);
         axios.post(`http://${url}/api_grouped_trips/complete`,
         {
             id: trip_id,
-            total_distance: total_distance + " km"  
+            actual_total_distance: actual_total_distance + " km"  
         },
         {
             headers:{
@@ -483,7 +489,8 @@ export function endTripAction()
                 type: END_TRIP,
                 payload: {
                     status,
-                    startCalculatingDistance: false
+                    startCalculatingDistance: false,
+                    distanceTravelled: 0
                 }
             });
             // stop observing
@@ -666,6 +673,45 @@ export function startCalculatingDistanceAction()
     }
 }
 
+export function allTripsOnRouteAction()
+{
+    return (dispatch, store)=>
+    {
+        const trip_id = store().viewTrip.trip_id;
+
+        axios.post(`http://${url}/api_grouped_trips/all_trips_on_route`,
+        {
+            id: trip_id,
+            all_trips_on_route: "true"
+        },
+        {
+            headers:{
+                'Authorization': `Bearer ${store().navigate.userToken}`
+            }
+        }
+        )
+        .then(async (res)=>{
+            let allTripsOnRoute = res.data.all_trips_on_route;
+            dispatch({
+                type: ALL_TRIPS_ON_ROUTE,
+                payload: {
+                    allTripsOnRoute
+                }
+            });
+            const startCalculatingDistance = store().viewTrip.startCalculatingDistance;
+
+            if(startCalculatingDistance == false)
+            {
+                console.log("starting distance calculation");
+                dispatch(startCalculatingDistanceAction());
+            }
+        })
+        .catch((e)=>{
+            console.log(e);
+        });
+    }
+}
+
 /**
  * Action handlers
  */
@@ -683,7 +729,8 @@ function handleGetTripData(state,action)
         order: { $set: action.payload.order},
         trips: { $set: action.payload.trips },
         passengerIsLoading: { $set: false },
-        firstPassenger: { $set: action.payload.firstPassenger }
+        firstPassenger: { $set: action.payload.firstPassenger },
+        allTripsOnRoute: { $set: action.payload.allTripsOnRoute}
     });
 }
 
@@ -740,7 +787,8 @@ function handleEndTrip(state,action)
 {
     return update(state,{
         status: { $set: action.payload.status },
-        startCalculatingDistance: { $set: action.payload.startCalculatingDistance}
+        startCalculatingDistance: { $set: action.payload.startCalculatingDistance},
+        distanceTravelled: {$set: action.payload.distanceTravelled}
     });
 }
 
@@ -788,9 +836,13 @@ function handleCalculateDistanceTravelled (state,action){
     })
 }
 
-function handleStartCalculatingDistance (state,action){
-    console.log("payload is: " + action.payload.startCalculatingDistance)
+function handleAllTripsOnRoute (state,action){
+    return update(state,{
+        allTripsOnRoute:{ $set: action.payload.allTripsOnRoute},
+    })
+}
 
+function handleStartCalculatingDistance (state,action){
     return update(state,{
         startCalculatingDistance:{ $set: action.payload.startCalculatingDistance},
     })
@@ -811,7 +863,8 @@ const ACTION_HANDLERS = {
     SET_LOCATIONS: handleSetLocations,
     GET_INITIAL_LOCATION: handleGetInitialLocation,
     CALCULATE_DISTANCE_TRAVELLED: handleCalculateDistanceTravelled,
-    START_CALCULATING_DISTANCE: handleStartCalculatingDistance
+    START_CALCULATING_DISTANCE: handleStartCalculatingDistance,
+    ALL_TRIPS_ON_ROUTE: handleAllTripsOnRoute
 }
 
 export function ViewTripReducer (state = initialState, action){

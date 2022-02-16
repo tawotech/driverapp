@@ -28,7 +28,8 @@ const Navigation = ({
     retrieveTokenAction,
     name,
     surname,
-    startDate
+    startDate,
+    status
 }) => {
     const authContext = useMemo(()=>({
         login:(email, password)=>{
@@ -57,7 +58,10 @@ const Navigation = ({
                     component={TripsContainer}
                     options={{
                         headerShown: true,
-                        header: props => <Header {...props}/>
+                        header: props => <Header 
+                            {...props}
+                            status={"alwayShow"}
+                        />
                     }} 
                 />
             </Drawer.Navigator>
@@ -110,7 +114,10 @@ const Navigation = ({
                                     component = {ViewTripContainer}
                                     options = {{
                                         headerShown:true,
-                                        header: props => <Header {...props} showBackIcon={true} />
+                                        header: props => <Header 
+                                            {...props} showBackIcon={true}
+                                            status={status} 
+                                        />
                                     }}
                                 />
                                 {

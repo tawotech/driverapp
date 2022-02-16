@@ -1,18 +1,56 @@
-import React, {useState, useContext, useEffect} from 'react'
+import React from 'react'
 import {
-    Box,
-    ScrollView,
-    Spinner,
     Center,
     Text,
     Pressable,
     VStack,
-    CloseIcon
+    HStack
   } from "native-base"
 
-const Options = ({optionsData, setShowOptions, onCancel}) => {
+const Options = ({
+    optionsData, 
+    setShowOptions,
+    skipTripAction,
+    declineTripAction,
+    acceptTripAction,
+    completeTripAction,
+    navigation,
+    allTripsOnRouteAction
+}) => {
 
-    console.log(optionsData);
+    const onYes = () =>{
+        if(optionsData.type == "passenger")
+        {
+            if(optionsData.command == "decline")
+            {
+                skipTripAction();
+            }
+            else if(optionsData.command == "accept")
+            {
+                completeTripAction()
+            }
+        }
+        else if (optionsData.type == "trip")
+        {
+            if (optionsData.command == "decline")
+            {
+                declineTripAction(navigation);
+            }
+            else if (optionsData.command == "accept")
+            {
+                acceptTripAction();
+            }
+        }
+        else if (optionsData.type == "allTripsOnRoute")
+        {
+            if (optionsData.command == "accept")
+            {
+                allTripsOnRouteAction();
+            }
+        }
+        setShowOptions(false);
+    }
+
     return(
     <>
         <Pressable
@@ -33,33 +71,20 @@ const Options = ({optionsData, setShowOptions, onCancel}) => {
             justifyContent={"center"}
             borderColor={'gray.300'}
             borderWidth={1}
-
+            px={4}
         >
-            <Pressable
-                position={"absolute"}
-                top={0}
-                right={0}
-                marginRight={3}
-                marginTop={3}
-                onPress={()=>setShowOptions(false)}
-            >
-                <CloseIcon 
-                    size="4"
-                    color = {'gray.400'} 
-                />
-            </Pressable>
             <Center>
                 <Text
                     color = "#535156"
                     fontWeight={"bold"}
                     fontSize={20}
                     mb={5}
-                > Options Menu</Text>
+                > Are you sure ?</Text>
             </Center>
             {
                 (optionsData.type == "passenger") &&
                 <>
-                    <Text>Cancel Trip for</Text>
+                    <Text>{(optionsData.command == "accept") ? `Confirm ${ optionsData.passengerBound == "inbound" ? "pickup" : "dropoff"} for: ` : "Cancel trip for:"}</Text>
                     <Center
                     >
                         <Text
@@ -86,21 +111,57 @@ const Options = ({optionsData, setShowOptions, onCancel}) => {
                     </Center>
                 </>
             }
-            
-            <Pressable
+
+            {   
+                (optionsData.type == "trip") &&
+                <Text>{ (optionsData.command == "accept") ? "Accept Trip" : "Decline Trip"}</Text>
+            }
+
+            {   
+                (optionsData.type == "allTripsOnRoute") &&
+                <Text>{"All passengers picked up."}</Text>
+            }
+
+            <HStack
                 mt="5"
-                w="80%"
-                bg={'red.400'}
-                alignItems={'center'}
-                py={4}
-                borderRadius={10}
-                onPress={()=>onCancel(optionsData)}
+                alignItems={"center"}
+                justifyContent={"space-around"}
+                width={"100%"}
             >
-                <Text
-                    color = "white"
-                    fontWeight={"bold"}
-                >Cancel Trip</Text>
-            </Pressable>
+                <Pressable
+                    py={2}
+                    px={2}
+                    bg="#745D95"
+                    borderRadius={8}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    w="40%"
+                    onPress={()=>onYes()}
+                >
+                    <Text
+                        color = "white"
+                        fontWeight={"bold"}
+                    >Yes</Text>
+                </Pressable>
+                <Pressable
+                    py={2}
+                    px={2}
+                    w="40%"
+                    borderRadius={8}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    borderColor={"#EA5F5F"}
+                    borderWidth={1}
+                    onPress={()=>setShowOptions(false)}
+                >
+                    <Text
+                        color = "#EA5F5F"
+                        fontWeight={"bold"}
+                    >No</Text>
+                </Pressable>
+            </HStack>
+            
+            
         </VStack> 
     </>
     )

@@ -8,7 +8,8 @@ import {
     Spinner,
     HamburgerIcon
 } from "native-base"
-import SwipeButton from '../../../../../components/SwipeButton'
+
+import AcceptDeclineComponent from '../../../../../components/AcceptDeclineComponent'
 
 const ConfirmationComponent = ({
     getPassengerAction,
@@ -21,14 +22,20 @@ const ConfirmationComponent = ({
     completeTripAction,
     passengerIsLoading,
     status,
-    onOptions
+    onOptions,
+    allTripsOnRoute
 }) =>
 {
-    const onPressAction = (status,isToggled) =>{
-        if(isToggled == true)
-        {
-            completeTripAction();
+    const onOptionsInterceptor = (data) =>{
+        let formateData = {
+            name: passengerName,
+            surname: passengerSurname,
+            location: passengerLocation,
+            destination: passengerDestination,
+            passengerBound: passengerBound,
+            ...data
         }
+        onOptions(formateData);
     }
 
     if(passengerIsLoading == true)
@@ -40,64 +47,93 @@ const ConfirmationComponent = ({
         )
     }
 
+    console.log("passnger bound: " + passengerBound + " allTripsOnRoute: " + allTripsOnRoute);
+
+    if(passengerBound == "outbound" && allTripsOnRoute != "true")
+    {
+        return(
+            <VStack
+                key ={passenger}
+                borderRadius='10'
+                w="100%"
+            >
+                <Text
+                    color= '#ADABB0'
+                    fontWeight='bold'
+                >On route to site:</Text>
+                <Text
+                    color= '#535156'
+                    fontWeight='bold'
+                    isTruncated
+                >{passengerLocation}</Text>
+                {
+                    <Center
+                        w="100%"
+                        mt ={2}
+                    >
+                        <Pressable
+                            py={2}
+                            px={2}
+                            bg="#745D95"
+                            borderRadius={8}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            w="100%"
+                            onPress={()=> onOptions({
+                                type: "allTripsOnRoute",
+                                command: "accept"
+                            })}
+                        >
+                            <Text
+                                fontWeight={"bold"}
+                                color={"#FFFFFF"}
+                            >Confirm passengers pickup</Text>
+                        </Pressable>
+                    </Center>
+                    
+                }
+
+            </VStack>
+        )
+    }
+
     return(
         <VStack
             key ={passenger}
-            bg={'green.100'}
-            py='2'
             borderRadius='10'
-            borderColor='green.500'
-            borderWidth='1'
-            alignItems='center'
+            w="100%"
         >
             <Text
-                color= 'green.700'
+                color= '#ADABB0'
+                fontWeight='bold'
             >On route to:
             </Text>
             <Text
                 isTruncated
+                color="#535156"
+                fontWeight={"bold"}
             >{` ${passengerBound == 'inbound' ? passengerLocation : passengerDestination}`}</Text>
             {
                 <Text
-                    color= 'green.700'
+                    color= '#745D95'
                     fontWeight='bold'
                     underline
                 >{`${passengerName} ${passengerSurname}`}</Text>
             }
-
             {
                 <Center
-                    alignItems={'center'}
-                    width= '100%'
+                    w="100%"
+                    mt ={2}
                 >
-                    <SwipeButton onToggle={onPressAction} 
-                        status = {status}
-                        headingText={passengerBound == 'inbound' ? 'Swipe right to confirm pickup' : 'Swipe right to confirm dropoff'}
+                    <AcceptDeclineComponent
+                        accetText={ passengerBound == 'inbound' ? 'Confirm pickup' : 'Confirm dropoff'}
+                        declineText={"Decline"}
+                        type ={"passenger"}
+                        onOptions={onOptionsInterceptor}
                     />
                 </Center>
+                
             }
-            <Center
-                position='absolute'
-                right = '0'
-                pr={2}
-                pt={1}
-            >
-                <Pressable
-                    onPress={()=>onOptions({
-                        type: "passenger",
-                        name: passengerName,
-                        surname: passengerSurname,
-                        location: passengerLocation,
-                        destination: passengerDestination
-                    })}
-                >
-                    <HamburgerIcon 
-                        size = '6'
-                        color= '#ADABB0'
-                    />
-                </Pressable>
-
-            </Center>
         </VStack>
     )
 

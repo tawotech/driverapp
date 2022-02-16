@@ -1,4 +1,3 @@
-import { position } from "native-base/lib/typescript/theme/styled-system";
 import React, { useState } from "react";
 import { View,
     Text, 

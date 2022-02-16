@@ -19,7 +19,7 @@ import {
 
 import ConfirmationComponent from './confirmation/ConfirmationComponent'
 import EndTripComponent from './confirmation/EndTripComponent'
-import SwipeButton from '../../../../components/SwipeButton'
+import AccepDeclineComponent from '../../../../components/AcceptDeclineComponent'
 
 const StatusComponent = ({
     status,
@@ -35,15 +35,12 @@ const StatusComponent = ({
     completeTripAction,
     endTripAction,
     passengerIsLoading,
-    onOptions
+    onOptions,
+    allTripsOnRoute,
 }) =>
 {
     const onPressAction = (status, toggled = null)=>{
-        if(status == 'scheduled' && toggled == true)
-        {
-            acceptTripAction();
-        }
-        else if ( status == 'accepted')
+        if ( status == 'accepted')
         {
             onRouteAction();
         }
@@ -59,29 +56,13 @@ const StatusComponent = ({
         {
             display = 'Accept Trip';
             
-            return (
-            <>
-                <Pressable
-                    position={"absolute"}
-                    right ={0}
-                    top = {0}
-                    mr = {2}
-                    mt = {2}
-                    onPress={()=>onOptions({
-                        type: "trip"
-                    })}
-                >
-                    <HamburgerIcon 
-                        size = '6'
-                        color= '#ADABB0'
-                    />
-                </Pressable>
-                <SwipeButton
-                    onToggle={onPressAction} 
-                    status = {status}
-                    headingText = {"Swip right to accept trip"}
+            return( 
+                <AccepDeclineComponent
+                    accetText={"Accept trip"}
+                    declineText={"Decline trip"} 
+                    onOptions={onOptions}
+                    type={"trip"}
                 />
-            </>
             )
         }
         else if ( status == 'accepted')
@@ -118,13 +99,13 @@ const StatusComponent = ({
             bg='#FFFFFF'
             px='2'
             py='2'
-            marginBottom='2'
+            //marginBottom='2'
         >
             {
                 getStatusDisplay()
             }
             {
-                (status == 'on_route') &&
+                (status == 'on_route') && 
                 <ConfirmationComponent
                     status={status}
                     getPassengerAction={getPassengerAction}
@@ -137,6 +118,7 @@ const StatusComponent = ({
                     completeTripAction={completeTripAction}
                     passengerIsLoading = {passengerIsLoading}
                     onOptions={onOptions}
+                    allTripsOnRoute = {allTripsOnRoute}
                 />
             }
             {

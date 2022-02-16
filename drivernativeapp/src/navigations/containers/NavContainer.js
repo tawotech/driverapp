@@ -12,7 +12,8 @@ const mapStateToProps = (state) =>({
     loginState: state.navigate,
     name: state.trips.name,
     surname: state.trips.surname,
-    startDate: state.trips.startDate
+    startDate: state.trips.startDate,
+    status: state.viewTrip.status
 });
 
 const mapActionCreators = {

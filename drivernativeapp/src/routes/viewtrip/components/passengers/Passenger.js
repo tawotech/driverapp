@@ -85,7 +85,7 @@ const Passenger = ({
                         color="#535156"
                     > {`${trip.name} ${trip.surname}`}</Text>
                     <Pressable
-                        onPress={()=>openCallDialogAction()}
+                        onPress={()=>openCallDialogAction(trip.contact_number)}
                     >
                         <Text
                             fontWeight='bold'

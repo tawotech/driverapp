@@ -10,7 +10,7 @@ import {
 import { images } from '../components/context';
 import { Pressable } from 'react-native';
 
-const Header = ({navigation, showBackIcon} ) =>
+const Header = ({navigation, showBackIcon, status} ) =>
 {
     const onGoBack = () =>{
         navigation.navigate("trips");
@@ -19,6 +19,7 @@ const Header = ({navigation, showBackIcon} ) =>
     const openAppDrawer = ()=>{
         navigation.toggleDrawer();
     }
+
     return(
         <HStack
             w='100%'
@@ -26,10 +27,10 @@ const Header = ({navigation, showBackIcon} ) =>
             bg = '#FFFFFF'
             alignItems={'center'}
             justifyContent={'center'}
+            shadow={"9"}
         >
             {
-                showBackIcon &&
-                
+                (showBackIcon && status != "on_route" && status != "trips_completed") &&
                     <Center
                         position='absolute'
                         left='0'
@@ -54,21 +55,24 @@ const Header = ({navigation, showBackIcon} ) =>
                 alt="Alternate Text"
             />
             
-            <Center
-                position='absolute'
-                right = '0'
-                pr={5}
-            >
-                <Pressable
-                    onPress={()=>openAppDrawer()}
+            {
+                status != "on_route" && status != "trips_completed" &&
+                <Center
+                    position='absolute'
+                    right = '0'
+                    pr={5}
                 >
-                    <HamburgerIcon 
-                        size = '8'
-                        color= '#ADABB0'
-                    />
-                </Pressable>
+                    <Pressable
+                        onPress={()=>openAppDrawer()}
+                    >
+                        <HamburgerIcon 
+                            size = '8'
+                            color= '#ADABB0'
+                        />
+                    </Pressable>
 
-            </Center>
+                </Center>
+            }
         </HStack>
         
     )

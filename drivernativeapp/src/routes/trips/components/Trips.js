@@ -68,11 +68,13 @@ const Trips = ({
                     [
                         {
                             title: "Today's Trips",
-                            data: incompleteTrips
+                            data: incompleteTrips,
+                            number: incompleteTrips.length
                         },
                         {
                             title: "Completed Trips",
-                            data: completeTrips
+                            data: completeTrips,
+                            number: completeTrips.length
                         }
                     ]
                 }
@@ -95,14 +97,26 @@ const Trips = ({
                     )
                    
                 }}
-                renderSectionHeader={({ section: { title } }) => (
-                    <Center
+                renderSectionHeader={({ section: { title, number } }) => (
+                    <HStack
                         py='5'
+                        alignItems={"center"}
+                        justifyContent={"center"}
                     >
                         <Heading
                             color='#6E6C71'
                         >{title}</Heading>
-                    </Center>
+                        <Heading
+                            py={1}
+                            px={2}
+                            color='#6E6C71'
+                            marginLeft={2}
+                            bg={"gray.300"}
+                            borderRadius={10}
+                            fontSize={"sm"}
+                            //bg={'#E2E2E2'}
+                        >{number}</Heading>
+                    </HStack>
                 )}
                 refreshing={isLoading}
                 onRefresh={()=>getGroupedTripsAction()}

@@ -7,23 +7,23 @@ import {
 const color = (status) =>{
     if(status == "scheduled")
     {
-        return ['blue.500', 'blue.100']
+        return ['#0075FF', '#D9E8FA']
     }
     else if(status == "accepted")
     {
-        return ['yellow.500', 'yellow.100']
+        return ['#B99928', '#FFEEB2']
     }
     else if ( status == "on_route" || status == "trips_completed" )
     {
-        return ['green.500', 'green.100']
+        return ['#53AB67', '#D1FBDA']
     }
     else if (status == "complete")
     {
-        return ['gray.500','gray.100']
+        return ['#5A5A5A','#E5E5E5']
     }
     else
     {
-        return ['grey.500','grey.100']
+        return ['#5A5A5A','#E5E5E5']
     }
 
 }
@@ -34,14 +34,8 @@ const InnerStatusComponent = ({
     return(
         <Center
             key={status}
-            position="absolute"
-            right ='0'
-            top = '0'
             marginTop='2'
-            marginRight='2'
             borderRadius='8'
-            borderWidth='1'
-            borderColor={color(status)}
             bg={color(status)[1]}
             px = '1'
             py = '1'

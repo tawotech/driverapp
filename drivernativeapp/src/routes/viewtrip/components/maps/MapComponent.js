@@ -27,13 +27,16 @@ const MapComponent = ({
             >
                 <Center
                     borderRadius= '10'
-                    borderColor='#ADABB0'
+                    borderColor='#745D95'
                     borderWidth='1'
                     py='2'
                     px='2'
-                    width= '50%'
+                    width= '100%'
                 >
-                    <Text>Open in Google Maps</Text>
+                    <Text
+                        fontWeight={"bold"}
+                        color="#745D95"
+                    >Open in Google Maps</Text>
                 </Center>
             </Pressable>
             {

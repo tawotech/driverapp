@@ -47,7 +47,9 @@ const ViewTrip = ({
     firstPassenger,
     declineTripAction,
     skipTripAction,
-    distanceTravelled
+    distanceTravelled,
+    allTripsOnRoute,
+    allTripsOnRouteAction
 }) =>
 {
 
@@ -59,18 +61,6 @@ const ViewTrip = ({
         // toggle show options
         setOptionsData(data);
         setShowOptions(true);
-    }
-
-    const onCancel = (data) =>{
-        setShowOptions(false);
-        if(data.type == "passenger")
-        {
-            skipTripAction();
-        }
-        else if (data.type == "trip")
-        {
-            declineTripAction(navigation);
-        }
     }
 
     const { tripId }  = route.params; 
@@ -137,6 +127,12 @@ const ViewTrip = ({
                             passengerIsLoading = {passengerIsLoading}
                             navigation = {navigation}
                             onOptions={onOptions}
+                            allTripsOnRoute = {allTripsOnRoute}
+                        />
+                    }
+                    {
+                        <MapComponent
+                            openInGoogeMapsAction = {openInGoogeMapsAction} 
                         />
                     }
                     {
@@ -146,15 +142,10 @@ const ViewTrip = ({
                             openCallDialogAction = {openCallDialogAction}
                         />
                     }
-                    {
-                        <MapComponent
-                            openInGoogeMapsAction = {openInGoogeMapsAction} 
-                        />
-                    }
                     <Box
                         borderRadius='10'
                         bg ='#FFFFFF'
-                        marginBottom='2'
+                        marginTop='2'
                         py={5}
                         pl={5}
                     >
@@ -176,7 +167,12 @@ const ViewTrip = ({
                 <Options 
                     optionsData={optionsData} 
                     setShowOptions={setShowOptions}
-                    onCancel = {onCancel}
+                    acceptTripAction = {acceptTripAction}
+                    declineTripAction = {declineTripAction}
+                    skipTripAction = {skipTripAction}
+                    completeTripAction = {completeTripAction}
+                    navigation = {navigation}
+                    allTripsOnRouteAction = {allTripsOnRouteAction} 
                 />
             }
         </Center>
