@@ -20,7 +20,7 @@ const AccepDeclineComponent = ({
             w="100%"
         >
             <Pressable
-                py={2}
+                py={4}
                 px={2}
                 bg="#745D95"
                 borderRadius={8}
@@ -39,7 +39,7 @@ const AccepDeclineComponent = ({
             </Pressable>
 
             <Pressable
-                py={2}
+                py={4}
                 px={2}
                 w="48%"
                 borderRadius={8}

@@ -72,7 +72,7 @@ const ConfirmationComponent = ({
                         mt ={2}
                     >
                         <Pressable
-                            py={2}
+                            py={4}
                             px={2}
                             bg="#745D95"
                             borderRadius={8}

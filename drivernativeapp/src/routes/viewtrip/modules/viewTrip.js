@@ -503,7 +503,7 @@ export function endTripAction()
 }
 
 
-export function openInGoogeMapsAction()
+export function openInGoogeMapsAction(navigation)
 {
     return (dispatch, store)=>
     {
@@ -539,7 +539,11 @@ export function openInGoogeMapsAction()
           android: `${scheme}&travelmode=driving&avoid=t&waypoints=${wayLatLng}&destination=${destLatLng}&dir_action=navigate`
         });
 
-        Linking.canOpenURL(url)
+        navigation.push("mapView",{
+            url
+        })
+
+        /*Linking.canOpenURL(url)
         .then(supported=>{
             if(!supported)
             {
@@ -557,7 +561,7 @@ export function openInGoogeMapsAction()
                     }
                 })
             }
-        })        
+        })*/        
     }
 }
 

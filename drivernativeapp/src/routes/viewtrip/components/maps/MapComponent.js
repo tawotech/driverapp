@@ -6,12 +6,13 @@ import {
     Center,
     Box,
   } from "native-base"
-import { Pressable } from 'react-native';
+import { Pressable,Alert } from 'react-native';
 
 import RNMap from './RNMAP';
 
 const MapComponent = ({
-    openInGoogeMapsAction
+    openInGoogeMapsAction,
+    navigation
 }) =>
 {
     return(
@@ -23,7 +24,7 @@ const MapComponent = ({
             px = '2'
         >
             <Pressable
-                onPress={()=>openInGoogeMapsAction()}
+                onPress={()=>openInGoogeMapsAction(navigation)}
             >
                 <Center
                     borderRadius= '10'

@@ -14,6 +14,7 @@ const Drawer = createDrawerNavigator();
 import LoginContainer from '../../routes/login/containers/LoginContainer'
 import TripsContainer from '../../routes/trips/containers/TripsContainer';
 import ViewTripContainer from '../../routes/viewtrip/containers/ViewTripContainer';
+import MapViewContainer from '../../routes/mapview/containers/MapViewContainer';
 import { colorTheme } from '../../components/context';
 import CustomDrawerContent from './CustomDrawerContent';
 import Header from '../../components/Header';
@@ -131,16 +132,14 @@ const Navigation = ({
                                     />
                                 }
                                 {
-                                    /*<MainStack.Screen 
-                                        name = 'viewTrip' 
-                                    name = 'viewTrip' 
-                                        name = 'viewTrip' 
-                                        component = {ViewTripContainer}
+                                    <MainStack.Screen 
+                                        name = 'mapView' 
+                                        component = {MapViewContainer}
                                         options = {{
                                             headerShown:true,
                                             header: props => <Header navigation={props.navigation} showBackIcon={true}/>
                                         }}
-                                    />*/
+                                    />
                                 }
                             </MainStack.Navigator>
                         }

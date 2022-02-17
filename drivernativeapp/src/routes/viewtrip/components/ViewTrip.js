@@ -133,6 +133,7 @@ const ViewTrip = ({
                     {
                         <MapComponent
                             openInGoogeMapsAction = {openInGoogeMapsAction} 
+                            navigation = {navigation}
                         />
                     }
                     {
