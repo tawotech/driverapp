@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!--   Root container of Floating Widget View  -->
+    <RelativeLayout
+        android:id="@+id/root_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <!--  View while view is collapsed  -->
+
+        <RelativeLayout
+            android:id="@+id/collapse_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible"
+            xmlns:tools="http://schemas.android.com/tools"
+            >
+
+            <!--   ImageView of floating widget  -->
+            <ImageView
+                android:id="@+id/collapsed_iv"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginTop="8dp"
+                android:src="@mipmap/ic_launcher_round"
+                tools:ignore="ContentDescription" />
+
+            <!--   Close button to close Floating Widget View  -->
+            <ImageView
+                android:id="@+id/close_floating_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/circle_shape"
+                android:src="@drawable/ic_close_white_24dp"
+                tools:ignore="ContentDescription" />
+        </RelativeLayout>
+
+        <!--   View while view is expanded   -->
+        <LinearLayout
+            android:id="@+id/expanded_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:visibility="gone">
+            <!-- widget heading -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/floating_widget_image_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/ic_launcher"
+                />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:id="@+id/floating_widget_title_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/floating_widget_label"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:layout_weight="1"/>
+
+                <ImageView
+                    android:id="@+id/close_expanded_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_close_black_24dp"
+                />
+
+            </LinearLayout>
+
+            <!-- passenger view -->
+            <LinearLayout
+                android:id="@+id/passenger_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- passenger text area -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- android:visibility="gone" -->
+
+                    <TextView
+                        android:id="@+id/floating_widget_on_route"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:text="@string/floating_widget_on_route"
+                        android:textColor="@color/gray"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        />
+
+                    <TextView
+                        android:id="@+id/floating_widget_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:text="@string/floating_widget_address"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        />
+
+                    <TextView
+                        android:id="@+id/floating_widget_passenger_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:text="@string/floating_widget_passenger_name"
+                        android:textColor="@color/purple"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        />
+
+                </LinearLayout>
+
+                <!-- Button layout -->
+                <LinearLayout
+                    android:id="@+id/buttons_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="visible"
+                    android:layout_marginTop="10dp"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    >
+
+                    <!--   confirm passenger or trip  -->
+                    <Button
+                        android:id="@+id/accept"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".45"
+                        android:background="@drawable/yes_button"
+                        android:text="@string/accept_pickup_button_text"
+                        android:textColor="@color/white"
+                        android:textAlignment="center"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="5dp"
+                        />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="10dp"
+                        android:layout_weight=".10"/>
+
+                    <!--   decline passenger or trip  -->
+                    <Button
+                        android:id="@+id/decline"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".45"
+                        android:background="@drawable/decline_button"
+                        android:text="@string/decline_button_text"
+                        android:textColor="@color/red"
+                        android:textAlignment="center"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="5dp"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- end trip view -->
+            <LinearLayout
+                android:id="@+id/end_trip_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                xmlns:tools="http://schemas.android.com/tools"
+                >
+                <!-- end trip text area -->
+                <TextView
+                    android:id="@+id/end_trip_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/end_trip_text_area"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                />
+
+                <!-- end trip button -->
+                <Button
+                    android:id="@+id/end_trip_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/yes_button"
+                    android:text="@string/end_trip_button_text"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"
+                    android:paddingVertical="10dp"
+                    android:layout_marginTop="10dp"
+                />
+            </LinearLayout>
+
+            <!-- pick up all passengers -->
+            <LinearLayout
+                android:id="@+id/pickup_all_passengers_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                xmlns:tools="http://schemas.android.com/tools"
+                >
+                <!-- pick up all passengers text area -->
+                <TextView
+                    android:id="@+id/pickup_all_passengers_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/pickup_all_passengers_text_area"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    />
+
+                <!-- pickup all passengers button-->
+                <Button
+                    android:id="@+id/pickup_all_passengers_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/yes_button"
+                    android:text="@string/pickup_all_passengers_button_text"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"
+                    android:paddingVertical="10dp"
+                    android:layout_marginTop="10dp"
+                    />
+            </LinearLayout>
+
+
+            <!-- ye/no view -->
+            <LinearLayout
+                android:id="@+id/yes_no_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/yes_no_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/yes_no_confirm_pickup_passenger_text"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                />
+
+                <LinearLayout
+                    android:id="@+id/yes_no_buttons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    >
+
+                    <!--   yes to proceed  -->
+                    <Button
+                        android:id="@+id/yes"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/yes_confirm_button_text"
+                        android:textColor="@color/white"
+                        android:textAlignment="center"
+                        android:background="@drawable/yes_button"
+                        android:layout_weight=".45"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="5dp"
+                        />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="10dp"
+                        android:layout_weight=".10"/>
+
+                    <!--   Cancel to abort  -->
+                    <Button
+                        android:id="@+id/no"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_button_text"
+                        android:textColor="@color/gray"
+                        android:textAlignment="center"
+                        android:background="@drawable/no_button"
+                        android:layout_weight=".45"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="5dp"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

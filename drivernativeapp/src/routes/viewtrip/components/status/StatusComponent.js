@@ -78,14 +78,15 @@ const StatusComponent = ({
                 onPress={()=>onPressAction(status)}
             >
                 <Center
-                    bg={'green.100'}
+                    bg= "#745D95"
                     py='2'
                     borderRadius='10'
-                    borderColor='green.500'
+                    borderColor='#745D95'
                     borderWidth='1'
                 >
                     <Text
-                        color= 'green.700'
+                        color= '#FFFFFF'
+                        fontWeight="bold"
                     >{display}</Text>
                 </Center>
             </Pressable>
@@ -123,7 +124,10 @@ const StatusComponent = ({
             }
             {
                 (status == 'trips_completed') &&
-                <EndTripComponent endTripAction={endTripAction}/>
+                <EndTripComponent 
+                    endTripAction={endTripAction}
+                    onOptions={onOptions}
+                />
             }
         </VStack>
     )

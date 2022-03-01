@@ -15,7 +15,8 @@ const Options = ({
     acceptTripAction,
     completeTripAction,
     navigation,
-    allTripsOnRouteAction
+    allTripsOnRouteAction,
+    endTripAction
 }) => {
 
     const onYes = () =>{
@@ -48,6 +49,13 @@ const Options = ({
                 allTripsOnRouteAction();
             }
         }
+        else if(optionsData.type == "endTrip")
+        {
+            if (optionsData.command == "accept")
+            {
+                endTripAction();
+            }
+        }
         setShowOptions(false);
     }
 
@@ -60,9 +68,11 @@ const Options = ({
             position={"absolute"}
             alignItems={"center"}
             justifyContent={"center"}
+            bg="#000000"
+            opacity={0.40}
         />
         <VStack
-            h = "50%"
+            //h = "50%"
             bg={"gray.50"}
             w = '80%'
             borderRadius={"10px"}
@@ -72,54 +82,47 @@ const Options = ({
             borderColor={'gray.300'}
             borderWidth={1}
             px={4}
+            py={4}
         >
-            <Center>
-                <Text
-                    color = "#535156"
-                    fontWeight={"bold"}
-                    fontSize={20}
-                    mb={5}
-                > Are you sure ?</Text>
-            </Center>
             {
                 (optionsData.type == "passenger") &&
                 <>
-                    <Text>{(optionsData.command == "accept") ? `Confirm ${ optionsData.passengerBound == "inbound" ? "pickup" : "dropoff"} for: ` : "Cancel trip for:"}</Text>
-                    <Center
-                    >
-                        <Text
-                            color = "#535156"
-                            fontWeight={"bold"}
-                        > {`${optionsData.name} ${optionsData.surname}`}</Text>
-                    </Center>
-
-                    <Center
-                    >
-                        <Text
-                            isTruncated
-                        >{optionsData.location}</Text>
-                    </Center>
                     <Text
                         color = "#535156"
                         fontWeight={"bold"}
-                    >To</Text>
-                    <Center
-                    >
-                        <Text
-                            isTruncated
-                        >{optionsData.destination}</Text>
-                    </Center>
+                        fontSize={20}
+                    >{(optionsData.command == "accept") ? 
+                    `You are about to confirm a ${ optionsData.passengerBound == "inbound" ? "pickup" : "dropoff"} are you sure ?` 
+                    : `You are about to decline a ${ optionsData.passengerBound == "inbound" ? "pickup" : "dropoff"} are you sure ?` }</Text>
+                    
                 </>
             }
 
             {   
                 (optionsData.type == "trip") &&
-                <Text>{ (optionsData.command == "accept") ? "Accept Trip" : "Decline Trip"}</Text>
+                <Text
+                    color = "#535156"
+                    fontWeight={"bold"}
+                    fontSize={20}
+                >{ (optionsData.command == "accept") ? "You are about to accept a trip, are you sure?" : "You are about to decline a trip, are you sure?"}</Text>
             }
 
             {   
                 (optionsData.type == "allTripsOnRoute") &&
-                <Text>{"All passengers picked up."}</Text>
+                <Text
+                    color = "#535156"
+                    fontWeight={"bold"}
+                    fontSize={20}
+                >{"You are about to confirm pickup of passengers, are you sure?"}</Text>
+            }
+
+            {   
+                (optionsData.type == "endTrip") &&
+                <Text
+                    color = "#535156"
+                    fontWeight={"bold"}
+                    fontSize={20}
+                >{"You are about to end trip, are you sure?"}</Text>
             }
 
             <HStack
@@ -127,22 +130,36 @@ const Options = ({
                 alignItems={"center"}
                 justifyContent={"space-around"}
                 width={"100%"}
-            >
+            >   
                 <Pressable
                     py={2}
                     px={2}
-                    bg="#745D95"
+                    bg={(optionsData.command == "decline") ? "#FFFFFF" : "#745D95"}
+                    borderColor = {(optionsData.command == "decline") ? "#EA5F5F" : "#FFFFFF"}
+                    borderWidth={1}
                     borderRadius={8}
                     alignItems={"center"}
                     justifyContent={"center"}
                     w="40%"
                     onPress={()=>onYes()}
                 >
-                    <Text
-                        color = "white"
-                        fontWeight={"bold"}
-                    >Yes</Text>
+                    {
+                        (optionsData.type == "passenger" || optionsData.type == "trip") &&
+                        <Text
+                            color = {(optionsData.command == "decline") ? "#EA5F5F" : "#FFFFFF"}
+                            fontWeight={"bold"}
+                        >{ (optionsData.command == "accept") ? "Yes, confirm" : "Yes, decline"}</Text>
+                    }
+                    {   
+                        (optionsData.type == "allTripsOnRoute" || optionsData.type == "endTrip") &&
+                        <Text
+                            fontWeight={"bold"}
+                            color = "#FFFFFF"
+                        >{  (optionsData.type == "endTrip") ? "Yes, end" : "Yes, confirm"}</Text>
+                    }
+                    
                 </Pressable>
+
                 <Pressable
                     py={2}
                     px={2}
@@ -150,18 +167,16 @@ const Options = ({
                     borderRadius={8}
                     alignItems={"center"}
                     justifyContent={"center"}
-                    borderColor={"#EA5F5F"}
+                    borderColor={"#ADABB0"}
                     borderWidth={1}
                     onPress={()=>setShowOptions(false)}
                 >
                     <Text
-                        color = "#EA5F5F"
+                        color = "#ADABB0"
                         fontWeight={"bold"}
-                    >No</Text>
+                    >Cancel</Text>
                 </Pressable>
             </HStack>
-            
-            
         </VStack> 
     </>
     )

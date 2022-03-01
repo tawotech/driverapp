@@ -8,11 +8,22 @@
  import apiConstants from '../../../api/apiConstants'
  import { Linking, Alert, PermissionsAndroid } from 'react-native';
  import PushNotification from 'react-native-push-notification'
- import { getDistance } from 'geolib';
- import Geolocation from 'react-native-geolocation-service';
+import * as WidgetService  from '../../../Services/WidgetService';
+import * as TrackingService from '../../../Services/TrackingService';
+
+const { 
+    startWidgetService,
+    widgetPerformAction,
+    getWidgetState,
+    setWidgetState 
+} = WidgetService;
+
+const {
+    startCalculatingDistanceAction,
+    stopTrackingService,
+    getTrackingState
+} = TrackingService;
  
-
-
 const {url} = apiConstants;
  // login initial state
 const initialState = {
@@ -39,9 +50,9 @@ const initialState = {
     isLoading: true,
     currentLocation: null,
     prevLocation: null,
-    distanceTravelled: 0,
+    //distanceTravelled: 0,
     startCalculatingDistance: false,
-    allTripsOnRoute: "false",
+    allTripsOnRoute: "false"
 }
 
  /**
@@ -65,7 +76,8 @@ const {
     GET_INITIAL_LOCATION,
     CALCULATE_DISTANCE_TRAVELLED,
     START_CALCULATING_DISTANCE,
-    ALL_TRIPS_ON_ROUTE
+    ALL_TRIPS_ON_ROUTE,
+    UPDATE_WIDGET_STATUS
 } = actionConstants;
 const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
@@ -98,7 +110,6 @@ const handleNotification = (date,time) =>{
         }
     })
 }
-
 
 /**
  * Actions
@@ -162,51 +173,7 @@ export function getTripDataAction(id)
             {
                 dispatch(getPassengerAction());
             }
-
             //handleNotification(res.data.date,res.data.time);
-            // inititilise location tracking
-            try {
-                let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-                if (permited == false)
-                {
-                    const granted = await PermissionsAndroid.request( 
-                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-                    );
-                }
-
-                permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-
-                if( permited == true ) 
-                {
-                    Geolocation.watchPosition(
-                        (success)=>{
-                            const startCalculatingDistance = store().viewTrip.startCalculatingDistance;
-                            console.log("distance calculation status: " + startCalculatingDistance);
-                            if(startCalculatingDistance == true)
-                            { 
-                                const { latitude, longitude } = success.coords;
-                                dispatch(setLocations({latitude, longitude}));
-                            }
-                        },
-                        (error)=>{
-                            console.log(error);
-                        },
-                        {   
-                            enableHighAccuracy: true, 
-                            distanceFilter: 50,
-                            forceLocationManager: true,
-                            interval: 100
-                        }
-                    );
-                }
-                else
-                {
-                    console.log("Device location access required");
-                }
-                
-            } catch (error) {
-                console.log(error);
-            }
         })
         .catch((e)=>{
             console.log(e);
@@ -349,6 +316,12 @@ export function getPassengerAction()
                         status
                     }
                 });
+
+                let widgetState = await getWidgetState();
+                if(widgetState != null)
+                {
+                    widgetPerformAction(WidgetService.TRIPS_COMPLETED, widgetState);
+                }
             }
             else
             {
@@ -367,6 +340,23 @@ export function getPassengerAction()
                         status
                     }
                 });
+                // update widget
+                
+                let widgetState = await getWidgetState();
+                
+                if(widgetState != null)
+                {
+                    widgetState.passenger = passenger;
+                    widgetState.passengerName = trip[0].name;
+                    widgetState.passengerSurname = trip[0].surname;
+                    widgetState.passengerLocation = trip[0].location;
+                    widgetState.passengerDestination = trip[0].destination;
+                    widgetState.passengerBound = trip[0].trip_type;
+                    widgetState.allTripsOnRoute = allTripsOnRoute,
+                    widgetState.status = status;
+                    await setWidgetState(widgetState);
+                    widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
+                }
             }
 
             setTimeout(()=>{
@@ -381,8 +371,9 @@ export function getPassengerAction()
 
 export function completeTripAction()
 {
-    return (dispatch, store)=>
-    {
+    console.log("about to complete trip action");
+    return (dispatch, store)=>{
+        console.log("calling complete trip action");
         const trip_id = store().viewTrip.trip_id;
         const passenger_trip_id = store().viewTrip.passenger
         axios.post(`http://${url}/api_grouped_trips/complete_trip`,
@@ -409,14 +400,14 @@ export function completeTripAction()
                 }
             });
 
-            dispatch(getPassengerAction());
-
-            const startCalculatingDistance = store().viewTrip.startCalculatingDistance;
-            if(startCalculatingDistance == false)
+            //check if tracking service is runnning and attempt to start (on pickup and dropoff)
+            let trackingState = await TrackingService.getTrackingState();
+            if(trackingState == null)
             {
-                console.log("starting distance calculation");
-                dispatch(startCalculatingDistanceAction());
+                console.log(" starting distance calculation");
+                startCalculatingDistanceAction();
             }
+            dispatch(getPassengerAction());
         })
         .catch((e)=>{
             console.log(e);
@@ -454,9 +445,16 @@ export function skipTripAction()
                 }
             });
 
+            let trackingState = await TrackingService.getTrackingState();
+            if(trackingState == null)
+            {
+                console.log(" starting distance calculation");
+                startCalculatingDistanceAction();
+            }
+
             setTimeout(()=>{
                 dispatch(getPassengerAction());
-            },250);
+            },100);
         })
         .catch((e)=>{
             console.log(e);
@@ -466,10 +464,17 @@ export function skipTripAction()
 
 export function endTripAction()
 {
-    return (dispatch, store)=>
+    return async (dispatch, store)=>
     {
         const trip_id = store().viewTrip.trip_id;
-        const actual_total_distance = (store().viewTrip.distanceTravelled/1000);
+        let actual_total_distance = 0;
+        let trackingState = await getTrackingState();
+        if(trackingState != null)
+        {
+            actual_total_distance = trackingState.distanceTravelled/1000; // convert to km
+            console.log("total distance travelled is: " + actual_total_distance);
+        }
+
         axios.post(`http://${url}/api_grouped_trips/complete`,
         {
             id: trip_id,
@@ -489,12 +494,22 @@ export function endTripAction()
                 type: END_TRIP,
                 payload: {
                     status,
-                    startCalculatingDistance: false,
-                    distanceTravelled: 0
                 }
             });
-            // stop observing
-            Geolocation.stopObserving();
+            console.log("end trip action being called");
+            let widgetState = await getWidgetState();
+            if(widgetState != null)
+            {
+                widgetState.status = status;
+                await setWidgetState(widgetState);
+                widgetPerformAction(WidgetService.END_TRIP, widgetState);
+            }
+
+            console.log ("ending driver tracking service");
+            if(trackingState != null)
+            {
+                stopTrackingService();
+            }
         })
         .catch((e)=>{
             console.log(e);
@@ -507,10 +522,19 @@ export function openInGoogeMapsAction(navigation)
 {
     return (dispatch, store)=>
     {
-        let trips = store().viewTrip.trips;
-        let order = store().viewTrip.order;
+        let { 
+            status,
+            trips,
+            order,
+            passengerName,
+            passengerSurname,
+            passengerLocation,
+            passengerDestination,
+            allTripsOnRoute,
+            passenger,
+            trip_id
+        } = store().viewTrip;
         let bound = trips[0].trip_type;
-
         let route = order.split(",").map((id,index)=>{
             let trip = trips.filter((trip)=>(trip.id == id));
             if(bound == "inbound") return (`${trip[0].location_latitude},${trip[0].location_longitude}`);
@@ -539,11 +563,11 @@ export function openInGoogeMapsAction(navigation)
           android: `${scheme}&travelmode=driving&avoid=t&waypoints=${wayLatLng}&destination=${destLatLng}&dir_action=navigate`
         });
 
-        navigation.push("mapView",{
+        /*navigation.push("mapView",{
             url
-        })
+        })*/
 
-        /*Linking.canOpenURL(url)
+        Linking.canOpenURL(url)
         .then(supported=>{
             if(!supported)
             {
@@ -551,17 +575,33 @@ export function openInGoogeMapsAction(navigation)
             }
             else
             {
-                Linking.openURL(url);
-                dispatch({
+                setTimeout(()=>{
+                    Linking.openURL(url);
+                },100);
+
+                startWidgetService({
+                    trip_id,
+                    passenger,
+                    passengerName,
+                    passengerSurname,
+                    passengerLocation,
+                    passengerDestination,
+                    passengerBound: bound,
+                    status,
+                    allTripsOnRoute,
+                    trips
+                });
+                
+                /*dispatch({
                     type: OPEN_IN_GOOGLE_MAPS,
                     payload:{
                         origin: [],
                         waypoints: [],
                         destination:[]
                     }
-                })
+                })*/
             }
-        })*/        
+        });       
     }
 }
 
@@ -593,89 +633,6 @@ export function openCallDialogAction(contact)
     }
 }
 
-export function setLocations(currentLocation)
-{
-    return (dispatch, store)=>
-    {
-        prevLocation = store().viewTrip.currentLocation;
-        console.log("prev: " + prevLocation.latitude +"," + prevLocation.longitude + " current: " + currentLocation.latitude + "," + currentLocation.longitude);
-
-       dispatch({
-            type: SET_LOCATIONS,
-            payload:{
-                currentLocation,
-                prevLocation
-            }
-       });
-
-       dispatch(calculateDistanceTravelled());
-    }
-}
-
-export function getInitialLocation(location)
-{
-    return (dispatch, store)=>
-    {
-       dispatch({
-            type: GET_INITIAL_LOCATION,
-            payload:{
-                currentLocation: location,
-                prevLocation: location,
-                distanceTravelled: 0
-            }
-       })
-    }
-}
-
-export function calculateDistanceTravelled()
-{
-    return async (dispatch, store)=>
-    {
-
-        const { distanceTravelled, prevLocation, currentLocation } = store().viewTrip;
-        //console.log("prev: " + prevLocation.latitude +"," + prevLocation.longitude + " current: " + currentLocation.latitude + "," + currentLocation.longitude);
-        const pointToPointDist = await getDistance(prevLocation,currentLocation); 
-
-        let newDistanceTravelled = distanceTravelled + pointToPointDist;
-
-        console.log(newDistanceTravelled);
-
-       dispatch({
-            type: CALCULATE_DISTANCE_TRAVELLED,
-            payload:{
-                distanceTravelled: newDistanceTravelled
-            }
-       })
-    }
-}
-
-export function startCalculatingDistanceAction()
-{
-    return (dispatch, store)=>
-    {
-        Geolocation.getCurrentPosition(
-            (success)=>{
-                const { latitude, longitude } = success.coords;
-                dispatch(getInitialLocation({latitude,longitude}));
-                console.log("dispatching start distance calculation");
-                dispatch({
-                    type: START_CALCULATING_DISTANCE,
-                    payload:{
-                        startCalculatingDistance: true,
-                    }
-               })
-            },
-            (error)=>{
-                console.log(error);
-            },
-            {
-                enableHighAccuracy: true, 
-                distanceFilter: 50,
-                forceLocationManager: true,
-            }
-        );
-    }
-}
 
 export function allTripsOnRouteAction()
 {
@@ -702,17 +659,37 @@ export function allTripsOnRouteAction()
                     allTripsOnRoute
                 }
             });
-            const startCalculatingDistance = store().viewTrip.startCalculatingDistance;
 
-            if(startCalculatingDistance == false)
+            let widgetState = await getWidgetState();
+            if(widgetState != null)
             {
-                console.log("starting distance calculation");
-                dispatch(startCalculatingDistanceAction());
+                widgetState.allTripsOnRoute = allTripsOnRoute;
+                await setWidgetState(widgetState);
+                widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
+            }
+
+            // start tracking service
+            let trackingState = await TrackingService.getTrackingState();
+            if(trackingState == null)
+            {
+                startCalculatingDistanceAction();
             }
         })
         .catch((e)=>{
             console.log(e);
         });
+    }
+}
+
+export function refreshTripAction()
+{
+    return (dispatch,store)=>
+    {
+        const trip_id = store().viewTrip.trip_id;
+        if(trip_id != null)
+        {
+            dispatch(getTripDataAction(trip_id));
+        }
     }
 }
 
@@ -792,7 +769,6 @@ function handleEndTrip(state,action)
     return update(state,{
         status: { $set: action.payload.status },
         startCalculatingDistance: { $set: action.payload.startCalculatingDistance},
-        distanceTravelled: {$set: action.payload.distanceTravelled}
     });
 }
 
@@ -834,12 +810,6 @@ function handleGetInitialLocation (state,action){
     })
 }
 
-function handleCalculateDistanceTravelled (state,action){
-    return update(state,{
-        distanceTravelled:{ $set: action.payload.distanceTravelled},
-    })
-}
-
 function handleAllTripsOnRoute (state,action){
     return update(state,{
         allTripsOnRoute:{ $set: action.payload.allTripsOnRoute},
@@ -866,9 +836,8 @@ const ACTION_HANDLERS = {
     SKIP_TRIP: handleSkipTrip,
     SET_LOCATIONS: handleSetLocations,
     GET_INITIAL_LOCATION: handleGetInitialLocation,
-    CALCULATE_DISTANCE_TRAVELLED: handleCalculateDistanceTravelled,
     START_CALCULATING_DISTANCE: handleStartCalculatingDistance,
-    ALL_TRIPS_ON_ROUTE: handleAllTripsOnRoute
+    ALL_TRIPS_ON_ROUTE: handleAllTripsOnRoute,
 }
 
 export function ViewTripReducer (state = initialState, action){

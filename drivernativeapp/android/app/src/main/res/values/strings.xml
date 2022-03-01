@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">drivernativeapp</string>
+    <string name="create_floating_widget">Create Floating Widget</string>
+    <string name="floating_widget_label">Etapath</string>
+    <string name="floating_widget_details">Floating Widget Details</string>
+    <string name="draw_other_app_permission_denied">Draw over other app permission not available. App won\'t work without permission. Please try again.</string>
+    <string name="floating_widget_on_route">On route to:</string>
+    <string name="floating_widget_address">186 Frances Street</string>
+    <string name="floating_widget_passenger_name">Tawona Mushininga</string>
+
+    <string name="yes_no_confirm_dropoff_passenger_text">You are about to confirm a dropoff, are you sure?</string>
+    <string name="yes_no_confirm_pickup_passenger_text">You are about to confirm a pickup, are you sure?</string>
+
+    <string name="yes_no_decline_pickup_passenger_text">You are about to decline a pickup, are you sure?</string>
+    <string name="yes_no_decline_dropoff_passenger_text">You are about to decline a dropoff, are you sure?</string>
+
+    <string name="yes_no_pickup_all_passengers">You are about to confirm pickup of all passengers, are you sure?</string>
+    <string name="pickup_all_passengers_text_area">You can confirm pickup of passengers when they have boarded your vehicle.</string>
+    <string name="pickup_all_passengers_button_text">Confirm passengers pickup</string>
+
+
+    <string name="yes_no_end_trip_text">You are about to end trip, are you sure?</string>
+    <string name="end_trip_text_area">You can end your trip when you have reached your destination.</string>
+    <string name="end_trip_button_text">End Trip</string>
+
+    <string name="yes_confirm_button_text">Yes, confirm</string>
+    <string name="yes_decline_button_text">Yes, decline</string>
+    <string name="yes_end_button_text">Yes, end</string>
+    <string name="no_button_text">Cancel</string>
+
+    <string name="accept_pickup_button_text">Confirm Pickup</string>
+    <string name="accept_dropoff_button_text">Confirm Dropoff</string>
+
+    <string name="decline_button_text">Decline</string>
 </resources>

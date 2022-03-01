@@ -7,35 +7,28 @@ import {
   } from "native-base"
 
 const EndTripComponent = ({
-    endTripAction
+    onOptions
 }) =>
 {
     return(
-        <VStack
-            bg={'green.100'}
+        <Pressable
+            bg={'#745D95'}
             py='2'
             borderRadius='10'
-            borderColor='green.500'
+            borderColor='#745D95'
             borderWidth='1'
             alignItems='center'
+            onPress={()=>onOptions({
+                type: "endTrip",
+                command: "accept"
+            })}
+
         >
-            <Pressable
-                onPress={()=>endTripAction()}
-            >
-                <Box
-                    bg={'green.700'}
-                    py='2'
-                    px='2'
-                    borderRadius='10'
-                    //marginTop='3'
-                >
-                    <Text
-                        color= 'white'
-                        fontWeight='bold'
-                    >End Trip</Text>
-                </Box>
-            </Pressable>
-        </VStack>
+            <Text
+                color= 'white'
+                fontWeight='bold'
+            >End Trip</Text>
+        </Pressable>
     )
 
 }

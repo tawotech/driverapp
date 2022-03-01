@@ -1,5 +1,4 @@
-import React, {useState, useContext, useEffect} from 'react'
-import Header from '../../../components/Header';
+import React, {useState, useContext, useEffect,useRef} from 'react'
 import {
     Box,
     ScrollView,
@@ -15,6 +14,8 @@ import PassengersComponent from './passengers/PassengersComponent';
 import MapComponent from './maps/MapComponent';
 import StatusComponent from './status/StatusComponent'
 import Options from './options/Options';
+import { NativeModules, AppState} from 'react-native';
+const { CalendarModule } = NativeModules;
 
 const ViewTrip = ({
     navigation,
@@ -47,9 +48,9 @@ const ViewTrip = ({
     firstPassenger,
     declineTripAction,
     skipTripAction,
-    distanceTravelled,
     allTripsOnRoute,
-    allTripsOnRouteAction
+    allTripsOnRouteAction,
+    refreshTripAction
 }) =>
 {
 
@@ -68,6 +69,32 @@ const ViewTrip = ({
         getTripDataAction(tripId);
     },[]);
 
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener("change", nextAppState => {
+        if (
+            appState.current.match(/inactive|background/) &&
+            nextAppState === "active"
+        ) {
+            console.log("App has come to the foreground!");
+            refreshTripAction();
+        }
+
+        appState.current = nextAppState;
+        setAppStateVisible(appState.current);
+        console.log("AppState", appState.current);
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+
+
+
+    
     if (isLoading)
     {
         return(
@@ -134,6 +161,14 @@ const ViewTrip = ({
                         <MapComponent
                             openInGoogeMapsAction = {openInGoogeMapsAction} 
                             navigation = {navigation}
+                            completeTripAction = {completeTripAction}
+                            skipTripAction = {skipTripAction}
+                            endTripAction = {endTripAction}
+                            passengerName={passengerName}
+                            passengerSurname={passengerSurname}
+                            passengerLocation={passengerLocation}
+                            passengerDestination={passengerDestination}
+                            passengerBound={passengerBound}
                         />
                     }
                     {
@@ -156,10 +191,23 @@ const ViewTrip = ({
                             <Text
                                 color='#535156'
                                 fontWeight='bold'
-                            >{`${distanceTravelled/1000} km`}</Text>
+                            > 0 km</Text>
                         </Text>
                     </Box>
-                    
+                    <Pressable
+                        borderRadius='10'
+                        bg ='#FFFFFF'
+                        marginTop='2'
+                        py={5}
+                        pl={5}
+                        onPress={()=> CalendarModule.createCalendarEvent('testName', 'testLocation')}
+                    >
+                        <Text
+                            //color='#ADABB0'
+                        >
+                            Invoke native modul
+                        </Text>
+                    </Pressable>
                 </ScrollView>
 
             }
@@ -174,6 +222,7 @@ const ViewTrip = ({
                     completeTripAction = {completeTripAction}
                     navigation = {navigation}
                     allTripsOnRouteAction = {allTripsOnRouteAction} 
+                    endTripAction = {endTripAction}
                 />
             }
         </Center>
