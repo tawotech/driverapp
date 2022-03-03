@@ -62,6 +62,7 @@ const Navigation = ({
                         header: props => <Header 
                             {...props}
                             status={"alwayShow"}
+                            showMenuButton = {true}
                         />
                     }} 
                 />
@@ -118,6 +119,7 @@ const Navigation = ({
                                         header: props => <Header 
                                             {...props} showBackIcon={true}
                                             status={status} 
+                                            showMenuButton = {false}
                                         />
                                     }}
                                 />
@@ -127,7 +129,7 @@ const Navigation = ({
                                         component = {TermsAndConditionsContainer}
                                         options = {{
                                             headerShown:true,
-                                            header: props => <Header {...props} showBackIcon={true} />
+                                            header: props => <Header {...props} showBackIcon={true} showMenuButton = {false} />
                                         }}
                                     />
                                 }
@@ -137,7 +139,7 @@ const Navigation = ({
                                         component = {MapViewContainer}
                                         options = {{
                                             headerShown:true,
-                                            header: props => <Header navigation={props.navigation} showBackIcon={true}/>
+                                            header: props => <Header navigation={props.navigation} showBackIcon={true} showMenuButton = {false}/>
                                         }}
                                     />
                                 }

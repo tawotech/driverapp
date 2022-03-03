@@ -19,5 +19,7 @@ export const colorTheme = {
 export const images = {
     locationIcon: require('../assets/locationIcon.png'),
     ellipse: require('../assets/ellipse.png'),
-    useralt: require('../assets/useralt.png')
+    useralt: require('../assets/useralt.png'),
+    useraltSvg: require('../assets/useralt_svg.svg'),
+    ellipseSvg: require('../assets/ellipse_svg.svg')
 }

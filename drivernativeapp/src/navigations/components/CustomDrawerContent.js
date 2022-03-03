@@ -5,8 +5,8 @@ import {
     DrawerItem,
   } from '@react-navigation/drawer';
 
-  import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
+//import { SvgUri } from 'react-native-svg';
 import {
     View, 
     Text,
@@ -14,12 +14,10 @@ import {
     HStack,
     Center,
     Pressable,
-    Image
 } from 'native-base'
 
 import { AuthContext } from '../../components/context';
-import { images } from '../../components/context';
-
+import EllipseSvg from '../../assets/ellipse_svg.svg'
 
 const CustomDrawerContent = ({name, surname, startDate,navigation}) =>
 {
@@ -90,19 +88,12 @@ const CustomDrawerContent = ({name, surname, startDate,navigation}) =>
                     alignItems={"center"}
                     justifyContent={"center"}
                 >
-                    <Image
-                        size={16}
-                        resizeMode={"contain"}
-                        source={images.ellipse}
-                        alt="Alternate Text"
-                    />
-                    <Image
-                        size={8}
-                        resizeMode={"contain"}
-                        source={images.useralt}
-                        alt="Alternate Text"
-                        position={'absolute'}
-                    />
+                    {
+                        <EllipseSvg
+                            height={40}
+                            width={40}
+                        />
+                    }
                 </Center>
                 <View
                     pl ='5'

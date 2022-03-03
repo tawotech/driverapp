@@ -10,7 +10,7 @@ import {
 import { images } from '../components/context';
 import { Pressable } from 'react-native';
 
-const Header = ({navigation, showBackIcon, status} ) =>
+const Header = ({navigation, showBackIcon, status, showMenuButton} ) =>
 {
     const onGoBack = () =>{
         navigation.navigate("trips");
@@ -56,7 +56,7 @@ const Header = ({navigation, showBackIcon, status} ) =>
             />
             
             {
-                status != "on_route" && status != "trips_completed" &&
+                status != "on_route" && status != "trips_completed" && showMenuButton == true &&
                 <Center
                     position='absolute'
                     right = '0'

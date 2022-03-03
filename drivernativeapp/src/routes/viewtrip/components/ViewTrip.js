@@ -178,36 +178,6 @@ const ViewTrip = ({
                             openCallDialogAction = {openCallDialogAction}
                         />
                     }
-                    <Box
-                        borderRadius='10'
-                        bg ='#FFFFFF'
-                        marginTop='2'
-                        py={5}
-                        pl={5}
-                    >
-                        <Text
-                            //color='#ADABB0'
-                        >{`Distance Travelled: `}
-                            <Text
-                                color='#535156'
-                                fontWeight='bold'
-                            > 0 km</Text>
-                        </Text>
-                    </Box>
-                    <Pressable
-                        borderRadius='10'
-                        bg ='#FFFFFF'
-                        marginTop='2'
-                        py={5}
-                        pl={5}
-                        onPress={()=> CalendarModule.createCalendarEvent('testName', 'testLocation')}
-                    >
-                        <Text
-                            //color='#ADABB0'
-                        >
-                            Invoke native modul
-                        </Text>
-                    </Pressable>
                 </ScrollView>
 
             }

@@ -563,15 +563,38 @@ export function openInGoogeMapsAction(navigation)
           android: `${scheme}&travelmode=driving&avoid=t&waypoints=${wayLatLng}&destination=${destLatLng}&dir_action=navigate`
         });
 
+
+        try{
+            setTimeout(()=>{
+                Linking.openURL(url);
+            },100);
+
+            startWidgetService({
+                trip_id,
+                passenger,
+                passengerName,
+                passengerSurname,
+                passengerLocation,
+                passengerDestination,
+                passengerBound: bound,
+                status,
+                allTripsOnRoute,
+                trips
+            });
+        }catch(e){
+            Alert.alert('Cannot open Google Maps is it installed?' );
+        }
+
         /*navigation.push("mapView",{
             url
         })*/
 
-        Linking.canOpenURL(url)
+        /*Linking.canOpenURL(url)
         .then(supported=>{
+            console.log("linking support : " + supported); 
             if(!supported)
             {
-                Alert.alert('Cannot open google maps application, do you have one?')
+                Alert.alert('supported error: ' + JSON.stringify(supported) );
             }
             else
             {
@@ -592,16 +615,16 @@ export function openInGoogeMapsAction(navigation)
                     trips
                 });
                 
-                /*dispatch({
+                dispatch({
                     type: OPEN_IN_GOOGLE_MAPS,
                     payload:{
                         origin: [],
                         waypoints: [],
                         destination:[]
                     }
-                })*/
+                })
             }
-        });       
+        });*/       
     }
 }
 

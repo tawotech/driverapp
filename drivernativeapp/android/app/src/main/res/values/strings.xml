@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">drivernativeapp</string>
+    <string name="app_name">Etapath Driver Application</string>
     <string name="create_floating_widget">Create Floating Widget</string>
     <string name="floating_widget_label">Etapath</string>
     <string name="floating_widget_details">Floating Widget Details</string>
