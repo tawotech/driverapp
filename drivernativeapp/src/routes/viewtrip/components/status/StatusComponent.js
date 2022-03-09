@@ -1,19 +1,9 @@
 import React, {useState, useContext, useEffect} from 'react'
 import {
-    Box,
     Text,
-    Heading,
     VStack,
-    FormControl,
-    Input,
-    HStack,
     Center,
     Pressable,
-    FlatList,
-    Button,
-    SectionList,
-    ScrollView,
-    HamburgerIcon
   } from "native-base"
 
 
@@ -23,7 +13,6 @@ import AccepDeclineComponent from '../../../../components/AcceptDeclineComponent
 
 const StatusComponent = ({
     status,
-    acceptTripAction,
     onRouteAction,
     getPassengerAction,
     passenger,

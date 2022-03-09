@@ -1,12 +1,8 @@
-import React, {useState, useContext, useEffect,useRef} from 'react'
+import React, {useState, useEffect,useRef} from 'react'
 import {
-    Box,
     ScrollView,
     Spinner,
     Center,
-    Text,
-    Pressable,
-    VStack
   } from "native-base"
 
 import TripComponent from '../../trips/components/TripComponent';
@@ -14,8 +10,8 @@ import PassengersComponent from './passengers/PassengersComponent';
 import MapComponent from './maps/MapComponent';
 import StatusComponent from './status/StatusComponent'
 import Options from './options/Options';
-import { NativeModules, AppState} from 'react-native';
-const { CalendarModule } = NativeModules;
+import { AppState, Alert} from 'react-native';
+import OverlayPermissionModule from "rn-android-overlay-permission";
 
 const ViewTrip = ({
     navigation,
@@ -69,6 +65,33 @@ const ViewTrip = ({
         getTripDataAction(tripId);
     },[]);
 
+    useEffect(()=>{
+        if (Platform.OS === "android") {
+            OverlayPermissionModule.isRequestOverlayPermissionGranted((status) => {
+                console.log("overLay status : " + status );
+              if (status) {
+                Alert.alert(
+                  "Permissions",
+                  "Overlay Permission",
+                  [
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("Cancel Pressed"),
+                      style: "cancel",
+                    },
+                    {
+                      text: "OK",
+                      onPress: () => OverlayPermissionModule.requestOverlayPermission(),
+                    },
+                  ],
+                  {cancelable: true}
+                  //{ cancelable: false }
+                );
+              }
+            });
+        }    
+    },[]);
+
     const appState = useRef(AppState.currentState);
     const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
@@ -84,7 +107,6 @@ const ViewTrip = ({
 
         appState.current = nextAppState;
         setAppStateVisible(appState.current);
-        console.log("AppState", appState.current);
         });
 
         return () => {

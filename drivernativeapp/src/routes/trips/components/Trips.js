@@ -24,7 +24,6 @@ const Trips = ({
     getGroupedTripsAction,
     completeTrips,
     incompleteTrips,
-    vehicle,
     isLoading,
     assignFcmTokenAction
 }) =>
@@ -46,15 +45,6 @@ const Trips = ({
             tripId
         });
     }
-
-    /*if(isLoading == true)
-    {
-        return(
-            <Center flex = {1}>
-                <Spinner size="large"/>
-            </Center>
-        )
-    }*/
 
     return(
         <Box

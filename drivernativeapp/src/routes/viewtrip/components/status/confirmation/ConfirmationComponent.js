@@ -12,16 +12,13 @@ import {
 import AcceptDeclineComponent from '../../../../../components/AcceptDeclineComponent'
 
 const ConfirmationComponent = ({
-    getPassengerAction,
     passenger,
     passengerBound,
     passengerName,
     passengerSurname,
     passengerDestination,
     passengerLocation,
-    completeTripAction,
     passengerIsLoading,
-    status,
     onOptions,
     allTripsOnRoute
 }) =>
@@ -46,8 +43,6 @@ const ConfirmationComponent = ({
             </Center>
         )
     }
-
-    console.log("passnger bound: " + passengerBound + " allTripsOnRoute: " + allTripsOnRoute);
 
     if(passengerBound == "outbound" && allTripsOnRoute != "true")
     {

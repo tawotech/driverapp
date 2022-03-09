@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-feature android:name="android.permission.ACCESS_FINE_LOCATION" android:required="true"/>
+
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-feature android:name="android.permission.ACCESS_BACKGROUND_LOCATION" android:required="true"/>
+    
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
@@ -22,16 +26,12 @@
         android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
         android:launchMode="singleInstance"
         android:windowSoftInputMode="adjustResize">
-          android:launchMode="singleTask" -->
+          <!--android:launchMode="singleTask" -->
           <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      <!--meta-data     
-        android:name="com.google.android.geo.API_KEY"      
-        android:value="AIzaSyBofULgjMw92J0zXjF_7TtlQzYA8iQ5eV0"
-      /> -->
 
       <!-- Change the value to true to enable pop-up for in foreground on receiving remote notifications (for prevent duplicating while showing local notifications set this to false) -->
       <meta-data  android:name="com.dieam.reactnativepushnotification.notification_foreground"
@@ -57,10 +57,9 @@
               <action android:name="com.google.firebase.MESSAGING_EVENT" />
           </intent-filter>
       </service>
-        <service android:name="com.drivernativeapp.PassengerService"></service>
-        <service
-            android:name=".FloatingWidgetService"
-            android:enabled="true"
-            android:exported="false" />
+      <service
+        android:name=".FloatingWidgetService"
+        android:enabled="true"
+        android:exported="false" />
     </application>
 </manifest>

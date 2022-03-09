@@ -2,15 +2,9 @@ import React, { useEffect, useState } from 'react'
 import {
     Box,
     Text,
-    Heading,
     VStack,
-    FormControl,
-    Input,
     HStack,
-    Center,
-    Pressable,
-    FlatList,
-    Button
+    Pressable
   } from "native-base"
 import InnerStatusComponent from './InnerStatusComponet'
 
@@ -133,6 +127,7 @@ const TripComponent = ({
                             <Text
                                 color='#535156'
                                 fontWeight='bold'
+                                isTruncated
                             >{company}</Text>
                         </Box>
                         

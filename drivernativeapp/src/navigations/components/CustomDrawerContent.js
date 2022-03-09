@@ -1,16 +1,12 @@
 import React,{useContext} from 'react'
 import {
     DrawerContentScrollView,
-    DrawerItemList,
-    DrawerItem,
   } from '@react-navigation/drawer';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-//import { SvgUri } from 'react-native-svg';
 import {
     View, 
     Text,
-    VStack,
     HStack,
     Center,
     Pressable,

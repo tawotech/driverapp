@@ -31,7 +31,7 @@ const {url} = apiConstants;
 export const loginAction = (email, password)=>{     
     return (dispatch, store)=>{
         let userToken = '';
-        axios.post(`http://${url}/sessions`,{
+        axios.post(`${url}/sessions`,{
             email,
             password
         })

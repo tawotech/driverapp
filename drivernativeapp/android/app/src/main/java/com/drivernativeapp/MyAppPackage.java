@@ -11,11 +11,6 @@ import java.util.List;
 
 public class MyAppPackage implements ReactPackage {
 
-   /*@Override
-   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-       return Collections.emptyList();
-   }*/
-
    @Override
    public List<NativeModule> createNativeModules(
            ReactApplicationContext reactContext) {
@@ -28,9 +23,7 @@ public class MyAppPackage implements ReactPackage {
 
    @Override
    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-       return Arrays.<ViewManager>asList(
-            new MyViewManager(reactContext)
-       );
+       return Collections.emptyList();
    }
 
 }

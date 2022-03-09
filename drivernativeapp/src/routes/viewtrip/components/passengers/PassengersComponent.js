@@ -1,18 +1,6 @@
 import React, {useState, useContext, useEffect} from 'react'
 import {
-    Box,
-    Text,
-    Heading,
-    VStack,
-    FormControl,
-    Input,
-    HStack,
-    Center,
-    Pressable,
-    FlatList,
-    Button,
-    SectionList,
-    ScrollView,
+    VStack
   } from "native-base"
 
 import Passenger from './Passenger'

@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect} from 'react'
+import React from 'react'
 import {
     Text,
     VStack,
@@ -72,8 +72,6 @@ const Passenger = ({
 
             <VStack
                 w='95%'
-                //borderBottomWidth='2'
-                //borderBottomColor='#EEEDF0'
             >
                 <Text
                     color='#535156'

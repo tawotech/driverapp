@@ -1,8 +1,8 @@
-import React,{useEffect,useState, useMemo} from 'react';
+import React,{useEffect, useMemo} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from "@react-navigation/drawer"
-import { ActivityIndicator, View,Text } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { AuthContext } from '../../components/context';
 import { NativeBaseProvider, extendTheme} from 'native-base'
@@ -14,7 +14,6 @@ const Drawer = createDrawerNavigator();
 import LoginContainer from '../../routes/login/containers/LoginContainer'
 import TripsContainer from '../../routes/trips/containers/TripsContainer';
 import ViewTripContainer from '../../routes/viewtrip/containers/ViewTripContainer';
-import MapViewContainer from '../../routes/mapview/containers/MapViewContainer';
 import { colorTheme } from '../../components/context';
 import CustomDrawerContent from './CustomDrawerContent';
 import Header from '../../components/Header';
@@ -130,16 +129,6 @@ const Navigation = ({
                                         options = {{
                                             headerShown:true,
                                             header: props => <Header {...props} showBackIcon={true} showMenuButton = {false} />
-                                        }}
-                                    />
-                                }
-                                {
-                                    <MainStack.Screen 
-                                        name = 'mapView' 
-                                        component = {MapViewContainer}
-                                        options = {{
-                                            headerShown:true,
-                                            header: props => <Header navigation={props.navigation} showBackIcon={true} showMenuButton = {false}/>
                                         }}
                                     />
                                 }

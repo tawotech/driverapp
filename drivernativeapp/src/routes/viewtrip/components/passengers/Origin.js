@@ -3,8 +3,7 @@ import {
     Text,
     VStack,
     HStack,
-    Center,
-    Box
+    Center
   } from "native-base"
 
 

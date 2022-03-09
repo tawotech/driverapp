@@ -37,11 +37,6 @@ public class CalendarModule extends ReactContextBaseJavaModule {
     return "CalendarModule";
     }
 
-    @ReactMethod
-    public void createCalendarEvent(String name, String location) {
-        Log.d("CalendarModule", "Create event called with name: " + name
-        + " and location: " + location);
-    }
     // react method to start service for overlay component
     @ReactMethod
     public void startService(Promise promise) {
@@ -88,9 +83,6 @@ public class CalendarModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void performAction(String type, String name, String passengerLocation, String passengerDestination, String bound) {
         ActionObject action = new ActionObject(passengerLocation,passengerDestination,name,type,bound);
-         Log.d("CalendarModule", "passenger name: " + action.getName()
-        + " and location: " + action.getLocation() + "action: " + type);
-
         FloatingWidgetService.handleAction(action);
     }
 

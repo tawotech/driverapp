@@ -53,13 +53,15 @@ export function isLoadingAction(isLoading)
     }
 }
 export const getGroupedTripsAction = () =>{
-    return (dispatch, store)=>{
+    return async (dispatch, store)=>{
 
         dispatch(isLoadingAction(true));
 
-        axios.get(`http://${url}/api_dashboard/index`,{
+        let token = await store().navigate.userToken;
+
+        axios.get(`${url}/api_dashboard/index`,{
             headers:{
-                'Authorization': `Bearer ${store().navigate.userToken}`
+                'Authorization': `Bearer ${token}`
             }
         })
         .then(async (res)=>{
@@ -90,7 +92,7 @@ export const assignFcmTokenAction = ()=>{
     return async(dispatch,store)=>{
         try{
             let fcmToken = await AsyncStorage.getItem('fcmToken');
-            axios.post(`http://${url}/api_dashboard/assign_fcm_token`,
+            axios.post(`${url}/api_dashboard/assign_fcm_token`,
             {
                 fcm_token: fcmToken
             },

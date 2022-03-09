@@ -1,5 +1,4 @@
 import React, {useContext, useState,useEffect} from 'react'
-//import { View, Text, TextInput, Button } from "react-native";
 import { AuthContext } from '../../../components/context';
 import { images } from '../../../components/context';
 
@@ -17,9 +16,8 @@ import {
 
 import PushNotification from 'react-native-push-notification';
 
-const Login = ({navigation}) =>
+const Login = () =>
 {
-
     const createChannels = () => {
         PushNotification.createChannel({
             channelId: "app-channel",
@@ -32,8 +30,8 @@ const Login = ({navigation}) =>
     },[]);
 
     const [data, setData] = useState({
-        email: 'tawomusash2@gmail.com',
-        password: 'Musash8606'
+        email: '',
+        password: ''
     })
     const {login} = useContext(AuthContext);    
     const onEmailChanged = (text)=>{
@@ -48,9 +46,6 @@ const Login = ({navigation}) =>
             password: text
         });
     }
-
-    
-
 
     return(
         <Center flex={1} px={3}>

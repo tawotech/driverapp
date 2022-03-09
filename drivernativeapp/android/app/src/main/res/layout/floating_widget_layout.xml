@@ -2,11 +2,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
     <!--   Root container of Floating Widget View  -->
     <RelativeLayout
         android:id="@+id/root_container"
@@ -38,7 +33,7 @@
                 android:id="@+id/close_floating_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
+                android:layout_marginStart="50dp"
                 android:layout_marginTop="5dp"
                 android:background="@drawable/circle_shape"
                 android:src="@drawable/ic_close_white_24dp"
@@ -62,13 +57,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                xmlns:tools="http://schemas.android.com/tools">
                 <ImageView
                     android:id="@+id/floating_widget_image_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@mipmap/ic_launcher"
-                />
+                    tools:ignore="ContentDescription"
+                    />
 
                 <View
                     android:layout_width="0dp"
@@ -96,6 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/ic_close_black_24dp"
+                    tools:ignore="ContentDescription"
                 />
 
             </LinearLayout>

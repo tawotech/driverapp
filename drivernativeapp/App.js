@@ -45,16 +45,9 @@ PushNotification.configure({
     dispatch(saveFcmTokenAction(token))
   },
   onNotification: function (notification) {
-    console.log("NOTIFICATION:", notification);
     handleNotification(notification);
  },
   onAction: function (notification) {
-    console.log("NOTIFICATION ACTION:", notification);
-
-    /*if (notification.foreground == false)
-    {
-      dispatch(getGroupedTripsAction());
-    }*/
   },
  requestPermissions: Platform.OS === 'ios',
 });
@@ -63,9 +56,8 @@ PushNotification.configure({
 axios.interceptors.response.use(response=>{
   return response;
 },error=>{
-  Alert.alert("message: " + error.message + "status: " + error.status + "name : " + error.name );
-  //console.log("error: "+ JSON.stringify(error));
-  //console.log("response" + JSON.stringify(error.response.status))
+  Alert.alert("message: " + error.message + "status: " + error.name );
+  //console.log("response" + JSON.stringify(error));
 
   const {status} = error;
   if(status == 401) // unauthorized
