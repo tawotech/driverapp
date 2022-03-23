@@ -376,9 +376,17 @@ export function getPassengerAction() {
                         widgetState.passengerDestination = trip[0].destination;
                         widgetState.passengerBound = trip[0].trip_type;
                         widgetState.allTripsOnRoute = allTripsOnRoute,
-                            widgetState.status = status;
+                        widgetState.status = status;
                         await setWidgetState(widgetState);
-                        widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
+
+                        if(widgetState.passengerBound == "outbound" && widgetState.allTripsOnRoute == "false")
+                        {
+                            widgetPerformAction(WidgetService.PICK_ALL_PASSENGERS, widgetState);
+                        }
+                        else
+                        {
+                            widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
+                        }
                     }
                 }
 

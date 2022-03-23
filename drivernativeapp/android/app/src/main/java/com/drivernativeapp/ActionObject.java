@@ -7,6 +7,10 @@ public class ActionObject {
     public static final String TRIPS_COMPLETED = "TRIPS_COMPLETED";
     public static final String END_TRIP = "END_TRIP";
 
+    public static final String START_TRACKING = "START_TRACKING";
+    public static final String END_TRACKING = "END_TRACKING";
+
+
     private String location;
     private String destination;
     private String name;

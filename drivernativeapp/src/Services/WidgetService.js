@@ -9,6 +9,9 @@ export const TRIPS_COMPLETED = "TRIPS_COMPLETED";
 export const UPDATE_PASSENGER = "UPDATE_PASSENGER";
 export const PICK_ALL_PASSENGERS = "PICK_ALL_PASSENGERS";
 export const END_TRIP = "END_TRIP"
+export const START_TRACKING = "START_TRACKING"
+export const END_TRACKING = "END_TRACKING"
+
 
 const { CalendarModule } = NativeModules;
 const {url} = apiConstants;
@@ -252,7 +255,7 @@ export const startWidgetService = (widgetState) =>{
         status,
         allTripsOnRoute
     } = widgetState;
-    console.log(widgetState);
+
     if(status == "on_route")
     {
         
@@ -308,6 +311,23 @@ export const widgetPerformAction = (action, widgetState) =>{
         passengerDestination ? passengerDestination : "placeholder destination",
         passengerBound ? passengerBound : "placeholder bound"
     );
+}
+
+// show tracking
+
+export const showTracking = async (show) =>{
+    let widgetState = await getWidgetState();
+    if(widgetState != null)
+    {
+        if(show ==true)
+        {
+            widgetPerformAction(START_TRACKING,widgetState);
+        }
+        else
+        {
+            widgetPerformAction(END_TRACKING,widgetState);
+        }
+    }
 }
 
 // set widget state

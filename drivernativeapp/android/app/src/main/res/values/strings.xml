@@ -32,4 +32,5 @@
     <string name="accept_dropoff_button_text">Confirm Dropoff</string>
 
     <string name="decline_button_text">Decline</string>
+    <string name="floating_widget_tracking_label">Tracking</string>
 </resources>

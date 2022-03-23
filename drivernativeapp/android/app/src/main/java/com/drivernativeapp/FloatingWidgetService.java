@@ -42,7 +42,8 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
             removeFloatingWidgetView;
     private static TextView passengerName,
             passengerAddress,yesNoText,
-            yesNoButtonText,acceptPickupDropoffButtonText;
+            yesNoButtonText,acceptPickupDropoffButtonText,
+            trackingText;
 
     //private static View passengerStaticView, endTripStaticView;
     private ImageView remove_image_view;
@@ -197,6 +198,9 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
 
         // find accept pickup dropoff button text
         acceptPickupDropoffButtonText = mFloatingWidgetView.findViewById(R.id.accept);
+
+        // find tracking text
+        trackingText = mFloatingWidgetView.findViewById(R.id.floating_widget_tracking_text);
 
     }
 
@@ -385,6 +389,27 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         mFloatingWidgetView.findViewById(R.id.pickup_all_passengers_button).setOnClickListener(this);
     }
 
+    private static void showTrackingText(boolean show){
+        if(show == true)
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    trackingText.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+        else
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    trackingText.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
     public static void handleAction (ActionObject action)
     {
         bound = action.getBound();
@@ -402,6 +427,12 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
                 break;
             case ActionObject.END_TRIP:
                 onTripEnded(action);
+                break;
+            case ActionObject.START_TRACKING:
+                showTrackingText(true);
+                break;
+            case ActionObject.END_TRACKING:
+                showTrackingText(false);
                 break;
         }
     }
