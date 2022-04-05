@@ -13,9 +13,17 @@ const initialState = {
  * Action types
  */
 
+ 
 const {
 } = actionConstants;
 
+/**
+ * Actions
+ */
+
+/**
+ * Action handlers
+ */
 
 
 const ACTION_HANDLERS = {

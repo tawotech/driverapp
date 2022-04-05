@@ -10,8 +10,9 @@ import PassengersComponent from './passengers/PassengersComponent';
 import MapComponent from './maps/MapComponent';
 import StatusComponent from './status/StatusComponent'
 import Options from './options/Options';
-import { AppState, Alert} from 'react-native';
+import { AppState, Alert, PermissionsAndroid } from 'react-native';
 import OverlayPermissionModule from "rn-android-overlay-permission";
+import Disclosure from './disclosure/Disclosure'
 
 const ViewTrip = ({
     navigation,
@@ -52,6 +53,7 @@ const ViewTrip = ({
 
     const [showOptions, setShowOptions] = useState(false);
     const [optionsData, setOptionsData] = useState({});
+    const [showDisclosure, setShowDisclosure ] = useState(false);
 
 
     const onOptions = (data) =>{
@@ -90,6 +92,23 @@ const ViewTrip = ({
               }
             });
         }    
+    },[]);
+
+    const checkLocationPermission = async () =>{
+        try{
+            let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            if (permited == false){
+                //console.log("showing disclosure");
+                setShowDisclosure(true);
+            }
+        }catch(e){
+            console.log("error checking android permission");
+        }
+        
+    }
+
+    useEffect(()=>{
+       checkLocationPermission();
     },[]);
 
     const appState = useRef(AppState.currentState);
@@ -215,6 +234,12 @@ const ViewTrip = ({
                     navigation = {navigation}
                     allTripsOnRouteAction = {allTripsOnRouteAction} 
                     endTripAction = {endTripAction}
+                />
+            }
+            {
+                showDisclosure &&
+                <Disclosure
+                    setShowDisclosure={setShowDisclosure}
                 />
             }
         </Center>

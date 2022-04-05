@@ -11,6 +11,10 @@ import PushNotification from 'react-native-push-notification'
 import * as WidgetService from '../../../Services/WidgetService';
 import * as TrackingService from '../../../Services/TrackingService';
 import OverlayPermissionModule from "rn-android-overlay-permission";
+import { 
+    startRecordingRouteAction,
+    stopRouteService
+} from '../../../Services/RouteService';
 
 const {
     startWidgetService,
@@ -428,12 +432,9 @@ export function completeTripAction() {
                     }
                 });
 
-                //check if tracking service is runnning and attempt to start (on pickup and dropoff)
-                /*let trackingState = await TrackingService.getTrackingState();
-                if (trackingState == null) {
-                    console.log(" starting distance calculation");
-                    startCalculatingDistanceAction();
-                }*/
+                //attempt to start route tracking service
+                startRecordingRouteAction(trip_id);
+
                 dispatch(getPassengerAction());
             })
             .catch((e) => {
@@ -470,11 +471,8 @@ export function skipTripAction() {
                     }
                 });
 
-                /*let trackingState = await TrackingService.getTrackingState();
-                if (trackingState == null) {
-                    console.log(" starting distance calculation");
-                    startCalculatingDistanceAction();
-                }*/
+                //attempt to start route tracking service
+                startRecordingRouteAction(trip_id);
 
                 setTimeout(() => {
                     dispatch(getPassengerAction());
@@ -489,12 +487,6 @@ export function skipTripAction() {
 export function endTripAction() {
     return async (dispatch, store) => {
         const trip_id = store().viewTrip.trip_id;
-        /*let actual_total_distance = 0;
-        let trackingState = await getTrackingState();
-        if (trackingState != null) {
-            actual_total_distance = trackingState.distanceTravelled / 1000; // convert to km
-            console.log("total distance travelled is: " + actual_total_distance);
-        }*/
 
         axios.post(`${url}/api_grouped_trips/complete`,
             {
@@ -525,10 +517,8 @@ export function endTripAction() {
                     widgetPerformAction(WidgetService.END_TRIP, widgetState);
                 }
 
-                /*console.log("ending driver tracking service");
-                if (trackingState != null) {
-                    stopTrackingService();
-                }*/
+                //stop route service
+                stopRouteService();
             })
             .catch((e) => {
                 console.log(e);
@@ -664,11 +654,8 @@ export function allTripsOnRouteAction() {
                     widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
                 }
 
-                // start tracking service
-                /*let trackingState = await TrackingService.getTrackingState();
-                if (trackingState == null) {
-                    startCalculatingDistanceAction();
-                }*/
+                //attempt to start route tracking service
+                startRecordingRouteAction(trip_id);
             })
             .catch((e) => {
                 console.log(e);

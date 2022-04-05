@@ -3,7 +3,10 @@ import axios from 'axios';
 import apiConstants from '../api/apiConstants'
 import AsyncStorage from '@react-native-community/async-storage';
 
-//import * as TrackingService from './TrackingService';
+import { 
+    startRecordingRouteAction, 
+    stopRouteService
+} from './RouteService';
 
 export const TRIPS_COMPLETED = "TRIPS_COMPLETED";
 export const UPDATE_PASSENGER = "UPDATE_PASSENGER";
@@ -22,12 +25,6 @@ var endTripListener;
 var widgetStatusListener;
 var pickupAllPassengersListener;
 
-/*const {
-    startCalculatingDistanceAction,
-    stopTrackingService,
-    getTrackingState
-} = TrackingService;*/
-
 export const removeWidgetListeners = () =>
 {
     //removeAllListeners(eventType: string): void;
@@ -39,7 +36,7 @@ export const removeWidgetListeners = () =>
 }
 
 export const registerWidgetListeners = () =>{
-    console.log("registering widget listeners");
+    //console.log("registering widget listeners");
     const eventEmitter = new NativeEventEmitter(CalendarModule);
 
     acceptListener = eventEmitter.addListener('EtapathAcceptPassenger', (event) => {
@@ -48,12 +45,12 @@ export const registerWidgetListeners = () =>{
     });
 
     declineListener = eventEmitter.addListener('EtapathDeclinePassenger', (event) => {
-        console.log("declining passenger ====>");
+        //console.log("declining passenger ====>");
         widgetSkipTripAction();
     });
 
     endTripListener = eventEmitter.addListener('EtapathEndTrip', (event) => {
-        console.log("ending trip ===>")
+        //console.log("ending trip ===>")
         widgetEndTripAction();
     });
 
@@ -136,12 +133,10 @@ export async function widgetCompleteTripAction()
     }
     )
     .then(async (res)=>{
-        /*let trackingState = await TrackingService.getTrackingState();
-        if(trackingState == null)
-        {
-            startCalculatingDistanceAction();
-        }*/
         widgetGetPassengerAction();
+
+        // attempt to start recording route
+        startRecordingRouteAction(trip_id);
     })
     .catch((e)=>{
         console.log(e);
@@ -168,11 +163,9 @@ export async function widgetSkipTripAction()
         )
         .then(async (res)=>{
             widgetGetPassengerAction();
-            /*let trackingState = await TrackingService.getTrackingState();
-            if(trackingState == null)
-            {
-                startCalculatingDistanceAction();
-            }*/
+
+           // attempt to start recording route
+            startRecordingRouteAction(trip_id);
         })
         .catch((e)=>{
             console.log(e);
@@ -184,13 +177,6 @@ export async function widgetEndTripAction()
     const widgetState = await getWidgetState();
     const {trip_id} = widgetState;
     const userToken = await getUserToken();
-
-    /*let actual_total_distance = 0;
-    let trackingState = await getTrackingState();
-    if(trackingState != null)
-    {
-        actual_total_distance = trackingState.distanceTravelled/1000; // convert to km
-    }*/
 
     axios.post(`${url}/api_grouped_trips/complete`,
     {
@@ -204,10 +190,8 @@ export async function widgetEndTripAction()
     }
     )
     .then(async (res)=>{
-        /*if(trackingState != null)
-        {
-            stopTrackingService();
-        }*/
+       // stop route tracking service
+       stopRouteService();
     })
     .catch((e)=>{
         console.log(e);
@@ -235,12 +219,9 @@ export async function widgetAllTripsOnRouteAction()
     .then(async (res)=>{
         let widgetState = await getWidgetState();
         widgetPerformAction(UPDATE_PASSENGER, widgetState);
-        // start distance calculation
-        /*let trackingState = await getTrackingState();
-        if(trackingState == null)
-        {
-            startCalculatingDistanceAction();
-        }*/
+        
+        // attempt to start recording route
+        startRecordingRouteAction(trip_id);
     })
     .catch((e)=>{
         console.log(e);

@@ -56,11 +56,7 @@ PushNotification.configure({
 axios.interceptors.response.use(response=>{
   return response;
 },error=>{
-  Alert.alert("message: " + error.message + "status: " + error.name );
-  //console.log("response" + JSON.stringify(error));
-
-  const {status} = error;
-  if(status == 401) // unauthorized
+  if((error.response && (error.response.status == 401)) || error.status == 401 )
   {
     dispatch(logoutAction());
   }

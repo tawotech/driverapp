@@ -15,8 +15,13 @@ import {
   } from "native-base"
 
 import PushNotification from 'react-native-push-notification';
+import MessageBox from '../../../components/MessageBox';
 
-const Login = () =>
+const Login = ({
+    showMessageBox, 
+    message,
+    setShowMessageBox
+}) =>
 {
     const createChannels = () => {
         PushNotification.createChannel({
@@ -69,44 +74,54 @@ const Login = () =>
                 <VStack space={3} mt="5">
                     <FormControl>
                         <Input 
-                            size ='md'
+                            size ='xl'
                             placeholder='email'
                             value= {data.email}
                             borderColor={"#ADABB0"}
-                            color={"#9B999E"}
+                            color={"#696969"}
                             onChangeText={(text)=> onEmailChanged(text)}
+                            py={4}
                         />
                     </FormControl>
                     <FormControl>
                         <Input 
-                            size ='md'
+                            size ='xl'
                             placeholder='password'
                             type="password"
                             borderColor={"#ADABB0"}
                             borderWidth={"1"}
-                            color={"#9B999E"}
+                            color={"#696969"}
                             value={data.password}
                             onChangeText={(text)=> onPasswordChanged(text)}
+                            py={4}
                         />
                     </FormControl>
                     <Pressable 
-                        mt="2" 
+                        mt="5" 
                         //colorScheme = "purple.400"
                         bg = {'brand.900'}
                         alignItems={"center"}
                         rounded = "sm"
-                        py={3}
+                        py={5}
                         onPress={()=>login(data.email, data.password)}
                     >
                         <Text 
                             color={"white"}
                             fontWeight={"bold"}
+                            fontSize = "lg"
                         >
                             Login
                         </Text>
                     </Pressable>
                 </VStack>
             </Box>
+            {
+                showMessageBox &&
+                <MessageBox
+                    setShowMessageBox = {setShowMessageBox}
+                    message={message}
+                />
+            }
         </Center>
         
 

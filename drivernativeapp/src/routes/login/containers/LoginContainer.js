@@ -5,11 +5,17 @@ import Login from '../components/Login'
 import { 
 } from '../modules/login'
 
-const mapStateToProps = (state) =>({
+import { 
+    setShowMessageBox
+ } from '../../../navigations/modules/navigation';
 
+const mapStateToProps = (state) =>({
+    showMessageBox: state.navigate.showMessageBox,
+    message: state.navigate.message
 });
 
 const mapActionCreators = {
+    setShowMessageBox
 };
 
 export default connect (mapStateToProps,mapActionCreators)(Login); 

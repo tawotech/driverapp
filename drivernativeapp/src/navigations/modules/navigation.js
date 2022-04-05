@@ -13,6 +13,8 @@ const initialState = {
     isLoading: true,
     userToken: null,
     fcmToken: null,
+    showMessageBox: false, 
+    message: ""
 };
 
  /**
@@ -24,6 +26,7 @@ const {
     LOGOUT,
     RETRIEVE_TOKEN,
     SAVE_FCM_TOKEN,
+    SET_SHOW_MESSAGE_BOX
 } = actionConstants;
 
 const {url} = apiConstants;
@@ -55,7 +58,19 @@ export const loginAction = (email, password)=>{
             }
         })
         .catch((e)=>{
-            console.log(e);
+            let status = null;
+            
+            if((e.response && (e.response.status == 401)) || e.status == 401 )
+            {
+                status = 401;
+            }
+            dispatch({
+                type: SET_SHOW_MESSAGE_BOX,
+                payload:{
+                    message: status == 401 ? "Incorrect email or password" : e.message,
+                    showMessageBox: true
+                }
+            })
         });
     }
    
@@ -138,6 +153,20 @@ export const retrieveTokenAction = (userToken) =>{
     }
 }
 
+export const setShowMessageBox = (show, message) =>{
+    return (dispatch,store)=>{
+
+        dispatch({
+            type: SET_SHOW_MESSAGE_BOX,
+            payload:{
+                showMessageBox: show,
+                message
+            }
+        });
+    }
+} 
+
+
 /**
  * 
  * Ation handlers
@@ -171,11 +200,21 @@ function handleSaveFcmToken(state, action)
         fcmToken: { $set: action.payload.fcmToken } ,
     })
 }
+
+function handleSetShowMessageBox (state,action){
+    return update(state,{
+        showMessageBox:{ $set: action.payload.showMessageBox},
+        message:{ $set: action.payload.message},
+    })
+}
+
 const ACTION_HANDLERS = {
     LOGIN: handleLogin,
     LOGOUT: handleLogout,
     RETRIEVE_TOKEN: handleRetrieveToken,
     SAVE_FCM_TOKEN: handleSaveFcmToken,
+    SET_SHOW_MESSAGE_BOX:handleSetShowMessageBox
+
 }
 
 export function NavigationReducer (state = initialState, action){

@@ -7,9 +7,12 @@ import apiConstants from '../api/apiConstants';
 const { url } = apiConstants;
 import { showTracking } from './WidgetService';
 // inititilise location tracking
+
+var watchId = null; 
+
 export const registerListeners = async ( startLocation, endLocation, trip_id) =>{
     try {
-        let permissionToAsk = Platform.Version < 29 ? PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION : PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
+        /*let permissionToAsk = Platform.Version < 29 ? PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION : PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
         let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
 
         if (permited == false)
@@ -18,9 +21,9 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
                 permissionToAsk
             ]);
-        }
+        }*/
 
-        permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
             
         if( permited == true )
         {
@@ -39,10 +42,11 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
                         endedTracking: false,
                         startLocation,
                         endLocation,
-                        trip_id
+                        trip_id,
+                        route: []
                     });
 
-                    Geolocation.watchPosition(
+                    watchId = Geolocation.watchPosition(
                         (success)=>{
                             
                             const { latitude, longitude } = success.coords;
@@ -73,7 +77,7 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
         else
         {
             console.log("Device location access required: " + permited);
-            Alert.alert("Device location", "device location not granted: " + permited);
+            Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
         }
         
     } catch (error) {
@@ -83,7 +87,9 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
 
 export const removeListeners = () =>{
     // stop observing
-    Geolocation.stopObserving();
+    //Geolocation.stopObserving();
+    console.log("watch id is: " + watchId);
+    Geolocation.clearWatch(watchId);
 }
 
 export async function calculateDistanceTravelled(currentLocation)
@@ -110,6 +116,7 @@ export async function calculateDistanceTravelled(currentLocation)
             // set started tracking to true
             trackingState.startedTracking = true;
             // keep track of the prevLocation
+            trackingState.route.push(`${trackingState.prevLocation.latitude},${trackingState.prevLocation.longitude}`);
             trackingState.prevLocation = currentLocation;
             //console.log("tracking state: " + JSON.stringify(trackingState));
             //Alert.alert("Tracking Service", "Tracking Service has started");
@@ -129,6 +136,8 @@ export async function calculateDistanceTravelled(currentLocation)
         // update state
         trackingState.distanceTravelled = newDistanceTravelled;
         trackingState.prevLocation = currentLocation;
+        trackingState.route.push(`${currentLocation.latitude},${currentLocation.longitude}`);
+
         //console.log("distance: " + newDistanceTravelled)
         // check for endLocation proximity
         const endProximity = await getPreciseDistance(trackingState.endLocation,currentLocation);
@@ -200,11 +209,13 @@ export const stopTrackingService = async () =>{
     {
         let actual_total_distance = `${trackingState.distanceTravelled/1000} km`;
         let trip_id = trackingState.trip_id;
+        let route = trackingState.route.join('|');
 
         axios.post(`${url}/api_grouped_trips/set_actual_total_distance`,
         {
             id: trip_id,
-            actual_total_distance
+            actual_total_distance,
+            //route
         },
         {
             headers:{
