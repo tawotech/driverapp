@@ -20,3 +20,5 @@ export const images = {
     locationIcon: require('../assets/locationIcon.png'),
     ellipseSvg: require('../assets/ellipse_svg.svg')
 }
+
+export const queryUrl = "https://forms.gle/UHosSCucTetivu6K6";

@@ -8,6 +8,7 @@ import Destination from './Destination'
 import Origin from './Origin'
 
 const PassengersComponent = ({
+    time,
     trips,
     order,
     openCallDialogAction
@@ -32,6 +33,7 @@ const PassengersComponent = ({
                     
                     return(
                         <Passenger 
+                            time = {time}
                             key = {index}
                             trip = {trip[0]}
                             index = {index}

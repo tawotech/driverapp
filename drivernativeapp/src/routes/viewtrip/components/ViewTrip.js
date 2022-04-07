@@ -214,6 +214,7 @@ const ViewTrip = ({
                     }
                     {
                         <PassengersComponent 
+                            time = {time}
                             trips = {trips}
                             order = {order}
                             openCallDialogAction = {openCallDialogAction}

@@ -18,6 +18,7 @@ import { colorTheme } from '../../components/context';
 import CustomDrawerContent from './CustomDrawerContent';
 import Header from '../../components/Header';
 import TermsAndConditionsContainer from '../../routes/termsandconditions/containers/TermsAndConditionsContainer';
+import ContactsContainer from '../../routes/contacts/containers/ContactsContainer';
 const theme = extendTheme({colors: colorTheme});
 
 
@@ -132,6 +133,14 @@ const Navigation = ({
                                         }}
                                     />
                                 }
+                                <MainStack.Screen 
+                                    name = 'contacts' 
+                                    component = {ContactsContainer}
+                                    options = {{
+                                        headerShown:true,
+                                        header: props => <Header {...props} showBackIcon={true} showMenuButton = {false} />
+                                    }}
+                                />
                             </MainStack.Navigator>
                         }
                     </NativeBaseProvider>

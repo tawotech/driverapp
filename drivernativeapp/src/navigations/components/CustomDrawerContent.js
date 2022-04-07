@@ -62,6 +62,21 @@ const CustomDrawerContent = ({name, surname, startDate,navigation}) =>
                     marginTop ={5}
                 >
                     <Pressable
+                        onPress={()=>{
+                            navigation.navigate("contacts");
+                        }}
+                    >
+                        <Text
+                            fontSize = {20}
+                            fontWeight = "bold"
+                            color ='#535156'
+                        >Help Contacts</Text>
+                    </Pressable>
+                </Center>
+                <Center
+                    marginTop ={5}
+                >
+                    <Pressable
                         onPress = {()=>logout()}
                     >
                         <Text

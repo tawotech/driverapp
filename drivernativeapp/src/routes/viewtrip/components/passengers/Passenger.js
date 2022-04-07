@@ -10,6 +10,7 @@ import { Pressable } from 'react-native';
 
 
 const Passenger = ({
+    time,
     index,
     numTrips,
     trip,
@@ -92,6 +93,13 @@ const Passenger = ({
                         >{`${trip.contact_number}`}</Text>           
                     </Pressable>
                                         
+                </HStack>
+                <HStack>
+                    <Text
+                        fontWeight='bold'
+                        color="#535156"
+                    > Pickup Time: </Text>
+                    <Text>{`${(trip.trip_type == "inbound") ? trip.estimate : time}`}</Text>
                 </HStack>
                 {
                     trip.trip_type == "inbound" ?
