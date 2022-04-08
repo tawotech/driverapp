@@ -50,6 +50,8 @@ const TripComponent = ({
         return [_time,_suffix];
     }
 
+    const formatedFirstPassenger = firstPassenger.split(" ");
+
     return(
         <Pressable
             onPress={()=> viewTrip(id)}
@@ -65,6 +67,7 @@ const TripComponent = ({
                     py='2'
                     px = '2'
                     borderLeftRadius='10'
+                    justifyContent={"flex-start"}
                 >
                     
                     <Text
@@ -84,11 +87,11 @@ const TripComponent = ({
                     </Text>
                     <InnerStatusComponent status={status}/>
                 </VStack>
-                <HStack
+                <VStack
                     pl='2'
                     py='2'
                 >
-                    <VStack>
+                    <HStack>
                         <Box
                             marginBottom={2}
                         >
@@ -102,23 +105,9 @@ const TripComponent = ({
                             >{total_distance}</Text>
                         </Box>
 
-                        <Box>
-                            <Text
-                                color='#ADABB0'
-                                fontWeight={"bold"}      
-                            >Passengers</Text>
-                            <Text
-                                color='#535156'
-                                fontWeight='bold'
-                            >{numPassengers}</Text>
-                        </Box>
-                       
-                    </VStack>
-                    <VStack
-                        marginLeft={4}
-                    >
                         <Box
                             marginBottom={2}
+                            marginLeft={4}
                         >
                             <Text
                                 color='#ADABB0'
@@ -130,8 +119,24 @@ const TripComponent = ({
                                 isTruncated
                             >{company}</Text>
                         </Box>
-                        
+
+                    </HStack>
+                    <HStack>
                         <Box>
+                            <Text
+                                color='#ADABB0'
+                                fontWeight={"bold"}      
+                            >Pax</Text>
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{numPassengers}</Text>
+                        </Box>
+                        
+                        
+                        <Box
+                            marginLeft={3}
+                        >
                             <Text
                                 color='#ADABB0'  
                                 fontWeight={"bold"}    
@@ -139,10 +144,23 @@ const TripComponent = ({
                             <Text
                                 color='#535156'
                                 fontWeight='bold'
-                            >{`${firstPassenger}`}</Text>
+                            >{`${formatedFirstPassenger[0]} ${formatedFirstPassenger[1]}`}</Text>
                         </Box>
-                    </VStack>
-                </HStack>
+
+                        <Box
+                            marginLeft={4}
+                        >
+                            <Text
+                                color='#ADABB0'  
+                                fontWeight={"bold"}    
+                            >Time</Text>
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{`${formatedFirstPassenger[2]}`}</Text>
+                        </Box>
+                    </HStack>
+                </VStack>
             </HStack>
         </Pressable>
     )
