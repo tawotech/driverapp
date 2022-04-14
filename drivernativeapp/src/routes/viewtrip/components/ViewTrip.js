@@ -96,8 +96,10 @@ const ViewTrip = ({
 
     const checkLocationPermission = async () =>{
         try{
-            let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-            if (permited == false){
+            let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            let permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+
+            if (permitedFineLocation == false || permitedBackgroundLocation == false ){
                 //console.log("showing disclosure");
                 setShowDisclosure(true);
             }

@@ -6,7 +6,7 @@ import {
     HStack
   } from "native-base"
 
-import { PermissionsAndroid, Platform } from 'react-native' 
+import { Alert, PermissionsAndroid, Platform } from 'react-native' 
 
 const Disclosure = ({
     setShowDisclosure
@@ -15,11 +15,10 @@ const Disclosure = ({
     const onYes = async () =>{
         setShowDisclosure(false);
         try{
-            let permissionToAsk = Platform.Version < 29 ? PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION : PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
-            const granted = await PermissionsAndroid.requestMultiple([
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                permissionToAsk
-            ]);
+            const grantedFineLocation = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            const grantedBackgoundLocation = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+
+            //Alert.alert("Permission", `${JSON.stringify(grantedFineLocation) + " other:" + JSON.stringify(grantedBackgoundLocation)}`);
         }catch(e){
             console.log(e);
             console.log("error requesting permission")

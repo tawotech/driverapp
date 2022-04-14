@@ -10,9 +10,10 @@ var watchId = null;
 export const registerListeners = async ( trip_id) =>{
     try {
 
-        let permited = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        let permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
             
-        if( permited == true )
+        if( permitedFineLocation == true && permitedBackgroundLocation == true )
         {
             // get initial location
             Geolocation.getCurrentPosition(
