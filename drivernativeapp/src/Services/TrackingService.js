@@ -198,7 +198,7 @@ export const stopTrackingService = async () =>{
 
     if(userToken != null && trackingState != null)
     {
-        let actual_total_distance = `${trackingState.distanceTravelled/1000} km`;
+        let actual_total_distance = `${(trackingState.distanceTravelled/1000).toFixed(1)} km`;
         let trip_id = trackingState.trip_id;
         let route = trackingState.route.join('|');
 
