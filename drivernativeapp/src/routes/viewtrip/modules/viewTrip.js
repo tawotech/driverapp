@@ -565,7 +565,7 @@ export function openInGoogeMapsAction(navigation) {
 
         const url = Platform.select({
             ios: `${scheme}@${destLatLng}`,
-            android: `${scheme}&travelmode=driving&avoid=t&waypoints=${wayLatLng}&destination=${destLatLng}&dir_action=navigate`
+            android: `${scheme}&travelmode=driving&waypoints=${wayLatLng}&destination=${destLatLng}&dir_action=navigate`
         });
 
 

@@ -176,6 +176,7 @@ const ViewTrip = ({
                             status={status}
                             total_distance={total_distance}
                             numPassengers={trips.length}
+                            trip_type = {trips[0].trip_type}
                         />
                     }
                     {

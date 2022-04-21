@@ -83,6 +83,7 @@ const Trips = ({
                             status = {item.status}
                             total_distance={item.total_distance}
                             numPassengers = { item.num_trips}
+                            trip_type = {item.trip_type}
                         />
                     )
                    

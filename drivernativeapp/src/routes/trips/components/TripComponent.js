@@ -10,6 +10,12 @@ import InnerStatusComponent from './InnerStatusComponet'
 
 const MONTH_OF_THE_YEAR = ["JAN","FEB","MAR","APR", "MAY", "JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const DAY_OF_WEEK = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+const TRIP_TYPES = {
+    inbound: "Inbound",
+    outbound: "Outbound",
+    other: "Other"
+};
+
 
 const TripComponent = ({
     company,
@@ -22,7 +28,8 @@ const TripComponent = ({
     firstPassenger,
     status,
     total_distance,
-    numPassengers
+    numPassengers,
+    trip_type
 }) =>{
 
     const [dateMonth,setDateMonth] = useState({
@@ -103,6 +110,20 @@ const TripComponent = ({
                                 color='#535156'
                                 fontWeight='bold'
                             >{total_distance}</Text>
+                        </Box>
+
+                        <Box
+                            marginBottom={2}
+                            marginLeft={4}
+                        >
+                            <Text
+                                color='#ADABB0'
+                                fontWeight={"bold"}   
+                            >Type</Text>
+                            <Text
+                                color='#535156'
+                                fontWeight='bold'
+                            >{TRIP_TYPES[trip_type]}</Text>
                         </Box>
 
                         <Box
