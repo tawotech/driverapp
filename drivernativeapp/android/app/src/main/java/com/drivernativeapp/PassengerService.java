@@ -23,7 +23,6 @@ public class PassengerService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        Log.d("passenger service: ","now ========================>");
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
         chatHead = new ImageView(this);

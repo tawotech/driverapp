@@ -125,14 +125,12 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         //Inflate the removing view layout we created
         removeFloatingWidgetView = inflater.inflate(R.layout.remove_floating_widget_layout, null);
 
-        Log.d("Debug","===========>SDK" + Build.VERSION.SDK_INT + " Version O: " +  Build.VERSION_CODES.O);
         int LAYOUT_FLAG;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY ;
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE ;
         }
-        Log.d("NATIVE APP","===========>LAYOUT FLAG" + LAYOUT_FLAG);
 
         //Add the view to the window.
         WindowManager.LayoutParams paramRemove = new WindowManager.LayoutParams(

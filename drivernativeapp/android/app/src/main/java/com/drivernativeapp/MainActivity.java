@@ -34,11 +34,9 @@ public class MainActivity extends ReactActivity {
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE) {
       //Check if the permission is granted or not.
-      Log.d("RESULT","result code ==== > " + resultCode );
       //if (resultCode == RESULT_OK) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
           //If permission granted start floating widget service
-          Log.d("start activity service", "service has started" + " can draw: " + Settings.canDrawOverlays(this));
           startFloatingWidgetService();
       }
       else
