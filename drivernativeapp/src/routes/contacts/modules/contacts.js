@@ -14,7 +14,8 @@ const initialState = {
     allContacts: [],
     etapathSites: [],
     fleets: [],
-    emergency: []
+    emergency: [],
+    trainingVideoLink: null
 };
 
  /**
@@ -25,7 +26,8 @@ const initialState = {
 const {
     GET_CONTACTS,
     OPEN_CALL_DIALOG_CONTACTS,
-    OPEN_SEND_EMAIL
+    OPEN_SEND_EMAIL,
+    OPEN_TRAINING_VIDEO
 } = actionConstants;
 
 /**
@@ -43,14 +45,15 @@ export const getContacts = ()  =>{
             }
         })
         .then(async (res)=>{
-            const { all_contacts, etapath_sites, fleets, emergency} = res.data;
+            const { all_contacts, etapath_sites, fleets, emergency, training_video_link} = res.data;
             dispatch({
                 type: GET_CONTACTS,
                 payload: {
                     allContacts: all_contacts,
                     etapathSites: etapath_sites,
                     fleets,
-                    emergency
+                    emergency,
+                    trainingVideoLink: training_video_link
                 }
             });
         })
@@ -108,6 +111,29 @@ export function openSendEmailAction(email) {
     }
 }
 
+export function openTrainingVideo() {
+    return async (dispatch, store) => {
+        const url = await store().contacts.trainingVideoLink
+
+        Linking.canOpenURL(url)
+            .then(supported => {
+                if (!supported) {
+                    Alert.alert('Cannot open email')
+                }
+                else {
+                    Linking.openURL(url);
+
+                    dispatch({
+                        type: OPEN_TRAINING_VIDEO,
+                        payload: {
+                            trainingVideoLink: url
+                        }
+                    })
+                }
+            });
+    }
+}
+
 /**
  * Action handlers
  */
@@ -117,7 +143,8 @@ function handleGetContacts (state, action,) {
         allContacts: { $set: action.payload.allContacts },
         etapathSites: { $set: action.payload.etapathSites },
         fleets: { $set: action.payload.fleets },
-        emergency: { $set: action.payload.emergency }
+        emergency: { $set: action.payload.emergency },
+        trainingVideoLink: { $set: action.payload.trainingVideoLink }
     })
 }
 
@@ -126,6 +153,10 @@ function handleOpenCallDialog(state, action) {
 }
 
 function handleOpenSendEmail(state, action) {
+    return state;
+}
+
+function handleOpenTrainingVideo(state, action) {
     return state;
 }
 

@@ -40,7 +40,7 @@ export const registerWidgetListeners = () =>{
     const eventEmitter = new NativeEventEmitter(CalendarModule);
 
     acceptListener = eventEmitter.addListener('EtapathAcceptPassenger', (event) => {
-        console.log("accepting passenger now ===>");
+        //console.log("accepting passenger now ===>");
         widgetCompleteTripAction();
     });
 
@@ -180,8 +180,7 @@ export async function widgetEndTripAction()
 
     axios.post(`${url}/api_grouped_trips/complete`,
     {
-        id: trip_id,
-        //actual_total_distance
+        id: trip_id
     },
     {
         headers:{
@@ -241,8 +240,8 @@ export const startWidgetService = (widgetState) =>{
     {
         
         let prom = CalendarModule.startService();
-        prom.then((success)=>{
-            console.log(success);
+        prom.then(async(success)=>{
+
             initializeWidget(widgetState);
             if(passengerBound == "outbound" && allTripsOnRoute == "false")
             {
@@ -253,12 +252,16 @@ export const startWidgetService = (widgetState) =>{
                 widgetPerformAction(UPDATE_PASSENGER,widgetState);
             }
         })
+        .catch((error)=>{
+            console.log("failed to start widget service");
+            console.log(error);
+        })
     } 
     else if(status == "trips_completed")
     {
         let prom = CalendarModule.startService();
         prom.then((success)=>{
-            console.log(success);
+            //console.log(success);
             initializeWidget(widgetState);
             widgetPerformAction(TRIPS_COMPLETED,widgetState);
         })
@@ -269,6 +272,7 @@ export const startWidgetService = (widgetState) =>{
 }
 
 const initializeWidget = (widgetState) =>{
+    //console.log("initializing widget ======>");
     // register listeners
     registerWidgetListeners();
     // save widget state
@@ -298,10 +302,13 @@ export const widgetPerformAction = (action, widgetState) =>{
 
 export const showTracking = async (show) =>{
     let widgetState = await getWidgetState();
-    if(widgetState != null)
+    let isOpen = await isWidgetOpen();
+
+    if(widgetState != null && isOpen)
     {
         if(show ==true)
         {
+            //console.log(" showing trakinging text on widget ====>" + show);
             widgetPerformAction(START_TRACKING,widgetState);
         }
         else
@@ -359,3 +366,16 @@ const getUserToken = async () =>{
 
     return userToken;
 } 
+
+export const isWidgetOpen  = async () =>{
+
+    try {
+        let isOpen = await CalendarModule.isWidgetOpen();
+        //console.log(" widget is open ====#### ==> : "  + isOpen);
+        return isOpen;
+    } catch (error) {
+        console.log(error);
+        console.log("error checking widget status");
+        return false;
+    }
+}

@@ -1,5 +1,5 @@
 import Geolocation from 'react-native-geolocation-service';
-import { Alert, PermissionsAndroid } from 'react-native';
+import { Alert, PermissionsAndroid,Platform } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 import apiConstants from '../api/apiConstants';
@@ -10,14 +10,32 @@ var watchId = null;
 export const registerListeners = async ( trip_id) =>{
     try {
 
-        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-        let permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+        let apiLevel = Platform.Version;
+        let permitedFineLocation = false;
+        let permitedBackgroundLocation = false;
+
+        if(apiLevel >= 29) // android 10 or 11
+        {
+            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+        }
+        else // android 9 and below
+        {
+            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        }
+
             
-        if( permitedFineLocation == true && permitedBackgroundLocation == true )
+        if( 
+            (apiLevel >=29 && permitedFineLocation == true && permitedBackgroundLocation == true ) ||
+            (apiLevel < 29 && permitedFineLocation == true)
+        )
         {
             // get initial location
             Geolocation.getCurrentPosition(
                 (success)=>{
+
+                    //console.log (" started calcuating route =====> ");
+
                     const { latitude, longitude } = success.coords;
                     // set initial tracking state, current location as previous location
                     setRouteState({
@@ -55,7 +73,7 @@ export const registerListeners = async ( trip_id) =>{
         }
         else
         {
-            console.log("Device location access required in route service: " + permited);
+            //console.log("Device location access required in route service: Fine : " + permitedFineLocation +  " " + "background " + "Background " + permitedBackgroundLocation + "API: " + apiLevel);
             Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
         }
         
@@ -130,8 +148,24 @@ export const removeRouteState = async () =>{
     }
 }
 
+export const resetRouteService = async () =>{
+    //console.log("resetting route service");
+    try {
+        await removeListeners();
+        await removeRouteState();
+    }
+    catch(e){
+        console.log("failed to reset route service");
+        console.log(e);
+    }
+    
+}
+
 export const stopRouteService = async () =>{
     
+    // remove route listeners
+    removeListeners();
+
     // update actual distance travelled on the  database
     const routeState = await getRouteState();
     const userToken =  await getUserToken();

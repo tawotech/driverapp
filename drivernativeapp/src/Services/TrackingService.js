@@ -13,10 +13,24 @@ var watchId = null;
 export const registerListeners = async ( startLocation, endLocation, trip_id) =>{
     try {
 
-        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-        let permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+        let apiLevel = Platform.Version;
+        let permitedFineLocation = false;
+        let permitedBackgroundLocation = false;
+
+        if(apiLevel >= 29) // android 10 or 11
+        {
+            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+        }
+        else // android 9 and below
+        {
+            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        }
             
-        if( permitedFineLocation == true && permitedBackgroundLocation == true)
+        if( 
+            (apiLevel >=29 && permitedFineLocation == true && permitedBackgroundLocation == true ) ||
+            (apiLevel < 29 && permitedFineLocation == true)
+        )
         {
             // get initial location
             Geolocation.getCurrentPosition(
@@ -33,8 +47,7 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
                         endedTracking: false,
                         startLocation,
                         endLocation,
-                        trip_id,
-                        route: []
+                        trip_id
                     });
 
                     watchId = Geolocation.watchPosition(
@@ -56,6 +69,7 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
                     );
                 },
                 (error)=>{
+                    console.log("error registering listeners");
                     console.log(error);
                 },
                 {
@@ -67,8 +81,8 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
         }
         else
         {
-            console.log("Device location access required: " + permited);
-            Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
+            //console.log("Device location access required tracking service: Fine : " + permitedFineLocation +  " " + "background " + "Background " + permitedBackgroundLocation);
+            Alert.alert("Tracking service", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
         }
         
     } catch (error) {
@@ -79,7 +93,6 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
 export const removeListeners = () =>{
     // stop observing
     //Geolocation.stopObserving();
-    console.log("watch id is: " + watchId);
     Geolocation.clearWatch(watchId);
 }
 
@@ -100,14 +113,13 @@ export async function calculateDistanceTravelled(currentLocation)
     if(trackingState != null && trackingState.startedTracking == false)
     {
         const startProximity = await getPreciseDistance(trackingState.startLocation,currentLocation);
-        //console.log("start proximity: " + startProximity);
+        console.log("start proximity: " + startProximity);
 
         if(startProximity < 400) // set proximity check to 100 meters
         {
             // set started tracking to true
             trackingState.startedTracking = true;
             // keep track of the prevLocation
-            trackingState.route.push(`${trackingState.prevLocation.latitude},${trackingState.prevLocation.longitude}`);
             trackingState.prevLocation = currentLocation;
             //console.log("tracking state: " + JSON.stringify(trackingState));
             //Alert.alert("Tracking Service", "Tracking Service has started");
@@ -127,7 +139,6 @@ export async function calculateDistanceTravelled(currentLocation)
         // update state
         trackingState.distanceTravelled = newDistanceTravelled;
         trackingState.prevLocation = currentLocation;
-        trackingState.route.push(`${currentLocation.latitude},${currentLocation.longitude}`);
 
         //console.log("distance: " + newDistanceTravelled)
         // check for endLocation proximity
@@ -200,13 +211,11 @@ export const stopTrackingService = async () =>{
     {
         let actual_total_distance = `${(trackingState.distanceTravelled/1000).toFixed(1)} km`;
         let trip_id = trackingState.trip_id;
-        let route = trackingState.route.join('|');
 
         axios.post(`${url}/api_grouped_trips/set_actual_total_distance`,
         {
             id: trip_id,
             actual_total_distance,
-            //route
         },
         {
             headers:{
@@ -221,7 +230,7 @@ export const stopTrackingService = async () =>{
             //console.log("tracking ended");
             showTracking(false);
 
-            //removeListeners();
+            removeListeners();
             removeTrackingState();
         })
         .catch((e)=>{

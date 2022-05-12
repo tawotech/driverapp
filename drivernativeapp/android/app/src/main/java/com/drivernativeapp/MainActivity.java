@@ -2,6 +2,7 @@ package com.drivernativeapp;
 
 import android.content.Intent;
 import android.os.Build;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -33,10 +34,13 @@ public class MainActivity extends ReactActivity {
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE) {
       //Check if the permission is granted or not.
-      if (resultCode == RESULT_OK)
-        //If permission granted start floating widget service
-
-        startFloatingWidgetService();
+      Log.d("RESULT","result code ==== > " + resultCode );
+      //if (resultCode == RESULT_OK) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+          //If permission granted start floating widget service
+          Log.d("start activity service", "service has started" + " can draw: " + Settings.canDrawOverlays(this));
+          startFloatingWidgetService();
+      }
       else
         //Permission is not available then display toast
         Toast.makeText(this,

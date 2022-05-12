@@ -25,7 +25,6 @@ const SwipeButton = ({onToggle, status, headingText}) => {
     const handleComplete = (isToggled)=>{
         if(isToggled !== toggled)
         {
-            console.log("handle complete value is: " + isToggled);
             setToggled(isToggled);
             onToggle(status, isToggled);
         }

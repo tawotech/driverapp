@@ -3,6 +3,7 @@ import {
     ScrollView,
     Spinner,
     Center,
+    VStack,
   } from "native-base"
 
 import TripComponent from '../../trips/components/TripComponent';
@@ -10,7 +11,7 @@ import PassengersComponent from './passengers/PassengersComponent';
 import MapComponent from './maps/MapComponent';
 import StatusComponent from './status/StatusComponent'
 import Options from './options/Options';
-import { AppState, Alert, PermissionsAndroid } from 'react-native';
+import { AppState, Alert, PermissionsAndroid,Platform } from 'react-native';
 import OverlayPermissionModule from "rn-android-overlay-permission";
 import Disclosure from './disclosure/Disclosure'
 
@@ -70,7 +71,7 @@ const ViewTrip = ({
     useEffect(()=>{
         if (Platform.OS === "android") {
             OverlayPermissionModule.isRequestOverlayPermissionGranted((status) => {
-                console.log("overLay status : " + status );
+                //console.log("overLay status : " + status );
               if (status) {
                 Alert.alert(
                   "Permissions",
@@ -96,15 +97,31 @@ const ViewTrip = ({
 
     const checkLocationPermission = async () =>{
         try{
-            let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-            let permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
 
-            if (permitedFineLocation == false || permitedBackgroundLocation == false ){
-                //console.log("showing disclosure");
-                setShowDisclosure(true);
+            const apiLevel = Platform.Version;
+            let permitedFineLocation = false;
+            let permitedBackgroundLocation = false;
+
+            if(apiLevel >= 29 ) // android 11 and 11
+            {
+                permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+                permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
+
+                if (permitedFineLocation == false || permitedBackgroundLocation == false ){
+                    setShowDisclosure(true);
+                }
             }
+            else // less than android 10
+            {
+                // android level less than 10 does require the explicit request of background location
+                permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+                if (permitedFineLocation == false){
+                    setShowDisclosure(true);
+                }
+            }
+            
         }catch(e){
-            console.log("error checking android permission");
+            console.log("error checking android location permissions");
         }
         
     }
@@ -122,7 +139,7 @@ const ViewTrip = ({
             appState.current.match(/inactive|background/) &&
             nextAppState === "active"
         ) {
-            console.log("App has come to the foreground!");
+            //console.log("App has come to the foreground!");
             refreshTripAction();
         }
 
@@ -201,8 +218,12 @@ const ViewTrip = ({
                             allTripsOnRoute = {allTripsOnRoute}
                         />
                     }
+                
                     {
-                        <MapComponent
+                        <VStack
+                            marginTop={2}
+                        />
+                        /*<MapComponent
                             openInGoogeMapsAction = {openInGoogeMapsAction} 
                             navigation = {navigation}
                             completeTripAction = {completeTripAction}
@@ -213,7 +234,7 @@ const ViewTrip = ({
                             passengerLocation={passengerLocation}
                             passengerDestination={passengerDestination}
                             passengerBound={passengerBound}
-                        />
+                        />*/
                     }
                     {
                         <PassengersComponent 

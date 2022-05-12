@@ -29,6 +29,8 @@
                 tools:ignore="ContentDescription" />
 
             <!--   Close button to close Floating Widget View  -->
+
+            <!--
             <ImageView
                 android:id="@+id/close_floating_view"
                 android:layout_width="wrap_content"
@@ -38,7 +40,7 @@
                 android:background="@drawable/circle_shape"
                 android:src="@drawable/ic_close_white_24dp"
                 tools:ignore="ContentDescription" />
-            
+            -->
             <TextView
                 android:id="@+id/floating_widget_tracking_text"
                 android:layout_width="wrap_content"

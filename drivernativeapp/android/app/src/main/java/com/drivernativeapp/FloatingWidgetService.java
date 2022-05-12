@@ -63,6 +63,10 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
 
     }
 
+    public static String getClassName (){
+        return "com.drivernativeapp.FloatingWidgetService";
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -121,11 +125,20 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         //Inflate the removing view layout we created
         removeFloatingWidgetView = inflater.inflate(R.layout.remove_floating_widget_layout, null);
 
+        Log.d("Debug","===========>SDK" + Build.VERSION.SDK_INT + " Version O: " +  Build.VERSION_CODES.O);
+        int LAYOUT_FLAG;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY ;
+        }
+        Log.d("NATIVE APP","===========>LAYOUT FLAG" + LAYOUT_FLAG);
+
         //Add the view to the window.
         WindowManager.LayoutParams paramRemove = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,//TYPE_PHONE,
+                LAYOUT_FLAG,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
         //Specify the view position
@@ -378,7 +391,7 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
     }
 
     private void implementClickListeners() {
-        mFloatingWidgetView.findViewById(R.id.close_floating_view).setOnClickListener(this);
+        //mFloatingWidgetView.findViewById(R.id.close_floating_view).setOnClickListener(this);
         mFloatingWidgetView.findViewById(R.id.close_expanded_view).setOnClickListener(this);
         mFloatingWidgetView.findViewById(R.id.accept).setOnClickListener(this);
         mFloatingWidgetView.findViewById(R.id.decline).setOnClickListener(this);
@@ -602,6 +615,9 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
             case "end_trip":
                 CalendarModule.sendEvent(reactContext, "EtapathEndTrip", params);
                 endTripView.setVisibility(View.GONE);
+                CalendarModule.bringApplicationToFront(reactContext);
+                onCloseWidget();
+                stopSelf();
                 break;
             case "pickup_all_passengers":
                 CalendarModule.sendEvent(reactContext, "EtapathPickupAllPassengers", params);
@@ -642,11 +658,11 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.close_floating_view:
+            /*case R.id.close_floating_view:
                 //close the service and remove the from from the window
                 onCloseWidget();
                 stopSelf();
-                break;
+                break;*/
             case R.id.close_expanded_view:
                 collapsedView.setVisibility(View.VISIBLE);
                 expandedView.setVisibility(View.GONE);

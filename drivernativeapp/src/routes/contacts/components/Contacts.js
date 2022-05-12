@@ -24,7 +24,8 @@ const Contacts = ({
     emergency,
     etapathSites,
     openCallDialogAction,
-    openSendEmailAction
+    openSendEmailAction,
+    openTrainingVideo
 }) =>
 {
     useEffect(()=>{
@@ -94,6 +95,33 @@ const Contacts = ({
                             >Open query form</Text>
                         </Pressable>
                     </VStack>
+                    <VStack>
+                        {
+                            <Center
+                                marginTop={2} 
+                                marginBottom={3}
+                            >
+                                <Heading>View Training Video</Heading>
+                            </Center>
+                        }
+                        <Pressable
+                            onPress={()=>openTrainingVideo()}
+                            py={3}
+                            px={3}
+                            bg="#745D95"
+                            borderColor = "#FFFFFF"
+                            borderWidth={1}
+                            borderRadius={8}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                        >
+                            <Text
+                                fontWeight={"bold"}
+                                color={"#FFFFFF"}
+                            >Open Training Video</Text>
+                        </Pressable>
+                    </VStack>
+                    
                     <VStack marginY={5}/>
                 </ScrollView>
             }

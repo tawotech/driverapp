@@ -6,7 +6,8 @@ import Contacts from '../components/Contacts'
 import { 
     getContacts,
     openCallDialogAction,
-    openSendEmailAction
+    openSendEmailAction,
+    openTrainingVideo
 } from '../modules/contacts'
 
 
@@ -20,7 +21,8 @@ const mapStateToProps = (state) =>({
 const mapActionCreators = {
     getContacts,
     openCallDialogAction,
-    openSendEmailAction
+    openSendEmailAction,
+    openTrainingVideo
 };
 
 export default connect (mapStateToProps,mapActionCreators)(Contacts); 

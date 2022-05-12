@@ -21,7 +21,6 @@ const store = createStore (initialState);
 const {dispatch} = store;
 
 const handleNotification = (notification) =>{
-  console.log(notification)
   if (notification.foreground == true && !notification.data.hasOwnProperty("openedInForeground"))
   {
     PushNotification.localNotificationSchedule({

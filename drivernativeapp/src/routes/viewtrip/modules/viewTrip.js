@@ -13,14 +13,16 @@ import * as TrackingService from '../../../Services/TrackingService';
 import OverlayPermissionModule from "rn-android-overlay-permission";
 import { 
     startRecordingRouteAction,
-    stopRouteService
+    stopRouteService,
+    resetRouteService
 } from '../../../Services/RouteService';
 
 const {
     startWidgetService,
     widgetPerformAction,
     getWidgetState,
-    setWidgetState
+    setWidgetState,
+    isWidgetOpen
 } = WidgetService;
 
 const {
@@ -266,21 +268,32 @@ export function onRouteAction() {
                     }
                 });
 
+                resetRouteService();
+
                 dispatch(getPassengerAction());
 
                 // get route order 
                 let bound = trips[0].trip_type;
-                let route = order.split(",").map((id, index) => {
+                let route = [];
+                order.split(",").map((id, index) => {
                     let trip = trips.filter((trip) => (trip.id == id));
-                    if (bound == "inbound") return ({
-                        latitude: trip[0].location_latitude,
-                        longitude: trip[0].location_longitude
-                    })
-
-                    return ({
-                        latitude: trip[0].destination_latitude,
-                        longitude: trip[0].destination_longitude
-                    })
+                    if(trip.length != 0)
+                    {
+                        if (bound == "inbound")
+                        {
+                            route.push({
+                                latitude: trip[0].location_latitude,
+                                longitude: trip[0].location_longitude
+                            })
+                        } 
+                        else
+                        {
+                            route.push({
+                                latitude: trip[0].destination_latitude,
+                                longitude: trip[0].destination_longitude
+                            })
+                        }
+                    }
                 });
 
                 let destLatLng = null;
@@ -301,11 +314,32 @@ export function onRouteAction() {
                 let startLocation = route[0];
                 let endLocation =  destLatLng;
 
-                console.log("startLocation: " + JSON.stringify(startLocation));
-                console.log("endLocation: " + JSON.stringify(endLocation));
+                //console.log("startLocation : " + JSON.stringify(startLocation));
+                //console.log("endLocation : " + JSON.stringify(endLocation));
+                //console.log(route);
 
                 // start tracking service here
-                TrackingService.startCalculatingDistanceAction(startLocation,endLocation,trip_id);
+                startCalculatingDistanceAction(startLocation,endLocation,trip_id);
+
+                // open in google maps here
+                let passenger = res.data.passenger;
+
+                let trip = trips.filter((trip) => trip.id == passenger);
+                let data = { 
+                    order,
+                    trip_id,
+                    trips,
+                    passenger,
+                    passengerName: trip[0].name,
+                    passengerSurname: trip[0].surname,
+                    passengerLocation: trip[0].location,
+                    passengerDestination: trip[0].destination,
+                    passengerBound: trip[0].trip_type,
+                    allTripsOnRoute: res.data.all_trips_on_route,
+                    status: res.data.status
+                }
+                dispatch(openInGoogeMapsAction(data));
+
             })
             .catch((e) => {
                 console.log(e);
@@ -348,7 +382,9 @@ export function getPassengerAction() {
                     });
 
                     let widgetState = await getWidgetState();
-                    if (widgetState != null) {
+                    let isOpen = await isWidgetOpen();
+
+                    if (widgetState != null && isOpen) {
                         widgetPerformAction(WidgetService.TRIPS_COMPLETED, widgetState);
                     }
                 }
@@ -371,8 +407,9 @@ export function getPassengerAction() {
                     // update widget
 
                     let widgetState = await getWidgetState();
+                    let isOpen = await isWidgetOpen();
 
-                    if (widgetState != null) {
+                    if (widgetState != null && isOpen) {
                         widgetState.passenger = passenger;
                         widgetState.passengerName = trip[0].name;
                         widgetState.passengerSurname = trip[0].surname;
@@ -394,9 +431,7 @@ export function getPassengerAction() {
                     }
                 }
 
-                setTimeout(() => {
-                    dispatch(passengerIsLoadingAction(false));
-                }, 100);
+                dispatch(passengerIsLoadingAction(false));
             })
             .catch((e) => {
                 console.log(e);
@@ -509,9 +544,10 @@ export function endTripAction() {
                         status,
                     }
                 });
-                console.log("end trip action being called");
                 let widgetState = await getWidgetState();
-                if (widgetState != null) {
+                let isOpen = await isWidgetOpen();
+
+                if (widgetState != null && isOpen) {
                     widgetState.status = status;
                     await setWidgetState(widgetState);
                     widgetPerformAction(WidgetService.END_TRIP, widgetState);
@@ -527,8 +563,11 @@ export function endTripAction() {
 }
 
 
-export function openInGoogeMapsAction(navigation) {
+export function openInGoogeMapsAction(data) {
+
     return (dispatch, store) => {
+
+
         let {
             status,
             trips,
@@ -540,13 +579,24 @@ export function openInGoogeMapsAction(navigation) {
             allTripsOnRoute,
             passenger,
             trip_id
-        } = store().viewTrip;
-        let bound = trips[0].trip_type;
-        let route = order.split(",").map((id, index) => {
-            let trip = trips.filter((trip) => (trip.id == id));
-            if (bound == "inbound") return (`${trip[0].location_latitude},${trip[0].location_longitude}`);
+        } = data;
 
-            return (`${trip[0].destination_latitude},${trip[0].destination_longitude}`)
+        //console.log(JSON.stringify(data));
+        let bound = trips[0].trip_type;
+        let route = [];
+        order.split(",").map((id, index) => {
+            let trip = trips.filter((trip) => (trip.id == id));
+            if(trip.length != 0)
+            {
+                if (bound == "inbound")
+                {
+                    route.push(`${trip[0].location_latitude},${trip[0].location_longitude}`)
+                }
+                else
+                {
+                    route.push(`${trip[0].destination_latitude},${trip[0].destination_longitude}`)
+                }
+            }
         });
 
         let destLatLng = null;
@@ -572,11 +622,10 @@ export function openInGoogeMapsAction(navigation) {
         try {
             setTimeout(() => {
                 Linking.openURL(url);
-            }, 100);
+            }, 2000);
 
             OverlayPermissionModule.isRequestOverlayPermissionGranted((permissionStatus) => {
                 if (!permissionStatus) {
-                    console.log("starting widget service");
                     startWidgetService({
                         trip_id,
                         passenger,
@@ -648,7 +697,9 @@ export function allTripsOnRouteAction() {
                 });
 
                 let widgetState = await getWidgetState();
-                if (widgetState != null) {
+                let isOpen = await isWidgetOpen();
+
+                if (widgetState != null && isOpen) {
                     widgetState.allTripsOnRoute = allTripsOnRoute;
                     await setWidgetState(widgetState);
                     widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);

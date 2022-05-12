@@ -12,6 +12,9 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -19,10 +22,13 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
 public class CalendarModule extends ReactContextBaseJavaModule {
 
 
     private static ReactApplicationContext appContext;
+
     CalendarModule(ReactApplicationContext context) {
         super(context);
         appContext = context;
@@ -34,10 +40,28 @@ public class CalendarModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-    return "CalendarModule";
+        return "CalendarModule";
     }
 
     // react method to start service for overlay component
+
+
+    @ReactMethod
+    public void isWidgetOpen(Promise promise) {
+        try{
+            ActivityManager manager = (ActivityManager) getReactApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (FloatingWidgetService.getClassName().equals(service.service.getClassName())) {
+                    promise.resolve(true);
+                    return;
+                }
+            }
+            promise.resolve(false);
+        }catch (Exception e){
+            promise.reject(e);
+        }
+    }
+
     @ReactMethod
     public void startService(Promise promise) {
 
@@ -50,16 +74,30 @@ public class CalendarModule extends ReactContextBaseJavaModule {
                 getCurrentActivity().startActivityForResult(intent, MainActivity.DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE);
             }
         }
-        try {
-            Intent intent = new Intent(FloatingWidgetService.FLOATING_WIDGET_ID);
-            intent.setClass(this.getReactApplicationContext(), FloatingWidgetService.class);
-            getReactApplicationContext().startService(intent);
-            //FloatingWidgetService.setUri(uri);
-        } catch (Exception e) {
-            promise.reject(e);
-            return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(getReactApplicationContext())) {
+            try {
+                Intent intent = new Intent(FloatingWidgetService.FLOATING_WIDGET_ID);
+                intent.setClass(this.getReactApplicationContext(), FloatingWidgetService.class);
+                getReactApplicationContext().startService(intent);
+            } catch (Exception e) {
+                promise.reject(e);
+                return;
+            }
         }
         promise.resolve(result);
+    }
+
+    public static void bringApplicationToFront(ReactContext context) {
+        try {
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
+            pendingIntent.send();
+        } catch (Exception e) {
+            return;
+        }
     }
 
     public static void sendEvent(ReactContext reactContext,
@@ -69,6 +107,7 @@ public class CalendarModule extends ReactContextBaseJavaModule {
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, params);
     }
+
     @ReactMethod
     public void addListener(String eventName) {
         // Set up any upstream listeners or background tasks as necessary
