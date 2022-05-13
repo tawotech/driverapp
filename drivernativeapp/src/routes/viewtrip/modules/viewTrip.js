@@ -261,17 +261,27 @@ export function onRouteAction() {
             }
         )
             .then(async (res) => {
+                
+
+                resetRouteService();
+                let passenger = res.data.passenger;
+                let trip = trips.filter((trip) => trip.id == passenger);
+
                 dispatch({
                     type: ON_ROUTE,
                     payload: {
+                        passenger,
+                        passengerStatus: trip[0].status,
+                        passengerName: trip[0].name,
+                        passengerSurname: trip[0].surname,
+                        passengerLocation: trip[0].location,
+                        passengerDestination: trip[0].destination,
+                        passengerBound: trip[0].trip_type,
+                        allTripsOnRoute: res.data.all_trips_on_route,
                         status: res.data.status,
                     }
                 });
-
-                resetRouteService();
-
-                dispatch(getPassengerAction());
-
+                
                 // get route order 
                 let bound = trips[0].trip_type;
                 let route = [];
@@ -314,17 +324,11 @@ export function onRouteAction() {
                 let startLocation = route[0];
                 let endLocation =  destLatLng;
 
-                //console.log("startLocation : " + JSON.stringify(startLocation));
-                //console.log("endLocation : " + JSON.stringify(endLocation));
-                //console.log(route);
-
                 // start tracking service here
                 startCalculatingDistanceAction(startLocation,endLocation,trip_id);
 
                 // open in google maps here
-                let passenger = res.data.passenger;
 
-                let trip = trips.filter((trip) => trip.id == passenger);
                 let data = { 
                     order,
                     trip_id,
@@ -338,7 +342,11 @@ export function onRouteAction() {
                     allTripsOnRoute: res.data.all_trips_on_route,
                     status: res.data.status
                 }
-                dispatch(openInGoogeMapsAction(data));
+
+                
+                setTimeout(()=>{
+                    dispatch(openInGoogeMapsAction(data));
+                },100);
 
             })
             .catch((e) => {
@@ -567,7 +575,6 @@ export function openInGoogeMapsAction(data) {
 
     return (dispatch, store) => {
 
-
         let {
             status,
             trips,
@@ -618,12 +625,13 @@ export function openInGoogeMapsAction(data) {
             android: `${scheme}&travelmode=driving&waypoints=${wayLatLng}&destination=${destLatLng}&dir_action=navigate`
         });
 
-
+    
         try {
-            setTimeout(() => {
+            setTimeout(()=>{
+                console.log("opening in google maps now ===>");
                 Linking.openURL(url);
-            }, 2000);
-
+            }, 1000);
+            console.log("opening widget now =====> ");
             OverlayPermissionModule.isRequestOverlayPermissionGranted((permissionStatus) => {
                 if (!permissionStatus) {
                     startWidgetService({
@@ -639,11 +647,16 @@ export function openInGoogeMapsAction(data) {
                         trips
                     });
                 }
-            })
-
+            });
+            
         } catch (e) {
-            Alert.alert('Cannot open Google Maps is it installed?');
+           console.log(e);
+           console.log("error opening widget or onpening in google maps");
         }
+
+
+        
+        
     }
 }
 
@@ -746,7 +759,7 @@ function handleGetTripData(state, action) {
 
 function handleAcceptTrip(state, action) {
     return update(state, {
-        status: { $set: action.payload.status }
+        status: { $set: action.payload.status },
     });
 }
 
@@ -756,7 +769,14 @@ function handleDeclineTrip(state, action) {
 
 function handleOnRoute(state, action) {
     return update(state, {
-        status: { $set: action.payload.status }
+        status: { $set: action.payload.status },
+        passenger: { $set: action.payload.passenger },
+        passengerStatus: { $set: action.payload.passengerStatus },
+        passengerBound: { $set: action.payload.passengerBound },
+        passengerName: { $set: action.payload.passengerName },
+        passengerSurname: { $set: action.payload.passengerSurname },
+        passengerLocation: { $set: action.payload.passengerLocation },
+        passengerDestination: { $set: action.payload.passengerDestination },
     });
 }
 

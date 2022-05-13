@@ -40,7 +40,7 @@ export const registerWidgetListeners = () =>{
     const eventEmitter = new NativeEventEmitter(CalendarModule);
 
     acceptListener = eventEmitter.addListener('EtapathAcceptPassenger', (event) => {
-        //console.log("accepting passenger now ===>");
+        console.log("accepting passenger now ===>");
         widgetCompleteTripAction();
     });
 
@@ -133,6 +133,7 @@ export async function widgetCompleteTripAction()
     }
     )
     .then(async (res)=>{
+
         widgetGetPassengerAction();
 
         // attempt to start recording route

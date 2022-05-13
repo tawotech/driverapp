@@ -77,9 +77,12 @@ public class CalendarModule extends ReactContextBaseJavaModule {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(getReactApplicationContext())) {
             try {
-                Intent intent = new Intent(FloatingWidgetService.FLOATING_WIDGET_ID);
-                intent.setClass(this.getReactApplicationContext(), FloatingWidgetService.class);
-                getReactApplicationContext().startService(intent);
+                //Intent intent = new Intent(FloatingWidgetService.FLOATING_WIDGET_ID);
+                Intent intent = new Intent(getReactApplicationContext(),FloatingWidgetService.class);
+                //intent.setClass(this.getReactApplicationContext(), FloatingWidgetService.class);
+                //getReactApplicationContext().startService(intent);
+                ContextCompat.startForegroundService(getReactApplicationContext(), intent);
+
             } catch (Exception e) {
                 promise.reject(e);
                 return;
