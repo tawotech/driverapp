@@ -1,8 +1,9 @@
 import Geolocation from 'react-native-geolocation-service';
-import { Alert, PermissionsAndroid,Platform } from 'react-native';
+import { Alert, PermissionsAndroid } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 import apiConstants from '../api/apiConstants';
+import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 const { url } = apiConstants;
 // inititilise location tracking
 var watchId = null;
@@ -10,25 +11,8 @@ var watchId = null;
 export const registerListeners = async ( trip_id) =>{
     try {
 
-        let apiLevel = Platform.Version;
-        let permitedFineLocation = false;
-        let permitedBackgroundLocation = false;
-
-        if(apiLevel >= 29) // android 10 or 11
-        {
-            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-            permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
-        }
-        else // android 9 and below
-        {
-            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-        }
-
-            
-        if( 
-            (apiLevel >=29 && permitedFineLocation == true && permitedBackgroundLocation == true ) ||
-            (apiLevel < 29 && permitedFineLocation == true)
-        )
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if( permitedFineLocation == true)
         {
             // get initial location
             Geolocation.getCurrentPosition(
@@ -73,7 +57,6 @@ export const registerListeners = async ( trip_id) =>{
         }
         else
         {
-            //console.log("Device location access required in route service: Fine : " + permitedFineLocation +  " " + "background " + "Background " + permitedBackgroundLocation + "API: " + apiLevel);
             Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
         }
         
@@ -96,6 +79,7 @@ export async function recordRouteTravelled(currentLocation)
 
     if(routeState != null)
     {
+        //console.log("Route location: " + `${currentLocation.latitude},${currentLocation.longitude}`);
         routeState.route.push(`${currentLocation.latitude},${currentLocation.longitude}`);
         setRouteState(routeState);
     }
@@ -106,8 +90,46 @@ export async function startRecordingRouteAction(trip_id)
     const routeState = await getRouteState();
     if(routeState == null)
     {
-        registerListeners(trip_id);
+        if (ReactNativeForegroundService.is_running() && ReactNativeForegroundService.is_task_running("RoutingService"))
+        {
+            // if service is running and task is running remove the task
+            await ReactNativeForegroundService.remove_task("RoutingService");
+
+            // add new task with the new parameters
+            await ReactNativeForegroundService.add_task(() =>{
+                registerListeners(trip_id);
+            }, 
+            {
+                delay: 2000,
+                onLoop: false,
+                taskId: "RoutingService",
+                onError: (e) => console.log(`Error logging routing service:`, e),
+            });
+
+        }
+        else
+        {
+            await ReactNativeForegroundService.add_task(() =>{
+                registerListeners(trip_id);
+            }, 
+            {
+                delay: 2000,
+                onLoop: false,
+                taskId: "RoutingService",
+                onError: (e) => console.log(`Error logging routing service:`, e),
+            });
+
+            ReactNativeForegroundService.start({
+                id: 144,
+                title: "Etapath Location Service",
+                message: "Accessing your location!",
+                visibility: "private"
+            });
+        }
     }
+
+
+    
 }
 
 // set tracking state
@@ -188,6 +210,7 @@ export const stopRouteService = async () =>{
         )
         .then(async (res)=>{
             removeRouteState();
+            ReactNativeForegroundService.stop();
         })
         .catch((e)=>{
             console.log(e);

@@ -1,36 +1,20 @@
 import { getDistance, getPreciseDistance } from 'geolib';
 import Geolocation from 'react-native-geolocation-service';
-import { Alert, PermissionsAndroid, Platform } from 'react-native';
+import { Alert, PermissionsAndroid } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 import apiConstants from '../api/apiConstants';
 const { url } = apiConstants;
 import { showTracking } from './WidgetService';
-// inititilise location tracking
+import ReactNativeForegroundService from "@supersami/rn-foreground-service";
 
 var watchId = null; 
 
 export const registerListeners = async ( startLocation, endLocation, trip_id) =>{
     try {
 
-        let apiLevel = Platform.Version;
-        let permitedFineLocation = false;
-        let permitedBackgroundLocation = false;
-
-        if(apiLevel >= 29) // android 10 or 11
-        {
-            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-            permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
-        }
-        else // android 9 and below
-        {
-            permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-        }
-            
-        if( 
-            (apiLevel >=29 && permitedFineLocation == true && permitedBackgroundLocation == true ) ||
-            (apiLevel < 29 && permitedFineLocation == true)
-        )
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if(permitedFineLocation == true)
         {
             // get initial location
             Geolocation.getCurrentPosition(
@@ -81,7 +65,6 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
         }
         else
         {
-            //console.log("Device location access required tracking service: Fine : " + permitedFineLocation +  " " + "background " + "Background " + permitedBackgroundLocation);
             Alert.alert("Tracking service", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
         }
         
@@ -158,9 +141,45 @@ export async function calculateDistanceTravelled(currentLocation)
     }
 }
 
-export function startCalculatingDistanceAction(startLocation, endLocation, trip_id)
+export async function startCalculatingDistanceAction(startLocation, endLocation, trip_id)
 {
-    registerListeners(startLocation,endLocation,trip_id);
+    if (ReactNativeForegroundService.is_running() && ReactNativeForegroundService.is_task_running("TrackingService"))
+    {
+        // if service is running and task is running remove the task
+        await ReactNativeForegroundService.remove_task("TrackingService");
+
+        // add new task with the new parameters
+        await ReactNativeForegroundService.add_task(() =>{
+            registerListeners(startLocation,endLocation,trip_id);
+        }, 
+        {
+            delay: 2000,
+            onLoop: false,
+            taskId: "TrackingService",
+            onError: (e) => console.log(`Error logging:`, e),
+        });
+
+    }
+    else
+    {
+        await ReactNativeForegroundService.add_task(() =>{
+            registerListeners(startLocation,endLocation,trip_id);
+        }, 
+        {
+            delay: 2000,
+            onLoop: false,
+            taskId: "TrackingService",
+            onError: (e) => console.log(`Error logging:`, e),
+        });
+
+        ReactNativeForegroundService.start({
+            id: 144,
+            title: "Etapath Location Service",
+            message: "Accessing your location!",
+            visibility: "private"
+        });
+    }
+        
 }
 
 // set tracking state
@@ -232,6 +251,7 @@ export const stopTrackingService = async () =>{
 
             removeListeners();
             removeTrackingState();
+            ReactNativeForegroundService.remove_task("TrackingService");
         })
         .catch((e)=>{
             console.log(e);

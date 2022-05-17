@@ -8,7 +8,7 @@ import {
 
 import Toast from 'react-native-simple-toast';
 
-import { Alert, PermissionsAndroid, Platform } from 'react-native' 
+import { Alert, PermissionsAndroid } from 'react-native' 
 
 const Disclosure = ({
     setShowDisclosure
@@ -19,29 +19,14 @@ const Disclosure = ({
     }
     const onYes = async () =>{
         try{
-            const apiLevel = Platform.Version;
+            // here ask for both => fine location first, then background location
+            const grantedFineLocation = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            if( grantedFineLocation != 'granted')
+            {
+                Toast.show(`You should allow location permissions before you can use this app, Fine Location: ${grantedFineLocation}`, 6000);
+                return
+            }
 
-            if(apiLevel >= 29) // android 11 and 10
-            {
-                // here ask for both => fine location first, then background location
-                const grantedFineLocation = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-                const grantedBackgoundLocation = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
-                if( grantedFineLocation != 'granted' || grantedBackgoundLocation != 'granted')
-                {
-                    Toast.show(`You should allow location permissions before you can use this app, Fine Location: ${grantedFineLocation}, Background Location: ${grantedBackgoundLocation}`, 6000);
-                    return
-                }
-            }
-            else // android 9 and below
-            {
-                // only ask for location permission, background location will still be accessible
-                const grantedFineLocation = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-                if( grantedFineLocation != 'granted' )
-                {
-                    Toast.show(`You should allow location permissions before you can use this app, Fine Location: ${grantedFineLocation}`, 6000);
-                    return;
-                }
-            }
             setShowDisclosure(false);
 
         }catch(e){

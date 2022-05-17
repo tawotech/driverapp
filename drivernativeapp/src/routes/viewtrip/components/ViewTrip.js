@@ -88,7 +88,6 @@ const ViewTrip = ({
                     },
                   ],
                   {cancelable: true}
-                  //{ cancelable: false }
                 );
               }
             });
@@ -97,33 +96,13 @@ const ViewTrip = ({
 
     const checkLocationPermission = async () =>{
         try{
-
-            const apiLevel = Platform.Version;
-            let permitedFineLocation = false;
-            let permitedBackgroundLocation = false;
-
-            if(apiLevel >= 29 ) // android 11 and 11
-            {
-                permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-                permitedBackgroundLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION);
-
-                if (permitedFineLocation == false || permitedBackgroundLocation == false ){
-                    setShowDisclosure(true);
-                }
+            let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            if (permitedFineLocation == false){
+                setShowDisclosure(true);
             }
-            else // less than android 10
-            {
-                // android level less than 10 does require the explicit request of background location
-                permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-                if (permitedFineLocation == false){
-                    setShowDisclosure(true);
-                }
-            }
-            
         }catch(e){
             console.log("error checking android location permissions");
         }
-        
     }
 
     useEffect(()=>{
