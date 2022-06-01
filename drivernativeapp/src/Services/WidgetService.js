@@ -2,11 +2,13 @@ import { NativeModules,NativeEventEmitter } from 'react-native';
 import axios from 'axios';
 import apiConstants from '../api/apiConstants'
 import AsyncStorage from '@react-native-community/async-storage';
+import * as RouteService from './RouteService'
+import * as TrackingService from './TrackingService'
 
-import { 
+/*import { 
     startRecordingRouteAction, 
     stopRouteService
-} from './RouteService';
+} from './RouteService';*/
 
 export const TRIPS_COMPLETED = "TRIPS_COMPLETED";
 export const UPDATE_PASSENGER = "UPDATE_PASSENGER";
@@ -137,7 +139,7 @@ export async function widgetCompleteTripAction()
         widgetGetPassengerAction();
 
         // attempt to start recording route
-        startRecordingRouteAction(trip_id);
+        //startRecordingRouteAction(trip_id);
     })
     .catch((e)=>{
         console.log(e);
@@ -166,7 +168,7 @@ export async function widgetSkipTripAction()
             widgetGetPassengerAction();
 
            // attempt to start recording route
-            startRecordingRouteAction(trip_id);
+            //startRecordingRouteAction(trip_id);
         })
         .catch((e)=>{
             console.log(e);
@@ -191,7 +193,9 @@ export async function widgetEndTripAction()
     )
     .then(async (res)=>{
        // stop route tracking service
-       stopRouteService();
+       //stopRouteService();
+       RouteService.stop();
+       TrackingService.stop();
     })
     .catch((e)=>{
         console.log(e);
@@ -221,7 +225,7 @@ export async function widgetAllTripsOnRouteAction()
         widgetPerformAction(UPDATE_PASSENGER, widgetState);
         
         // attempt to start recording route
-        startRecordingRouteAction(trip_id);
+        //startRecordingRouteAction(trip_id);
     })
     .catch((e)=>{
         console.log(e);

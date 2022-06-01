@@ -4,54 +4,138 @@ import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 import apiConstants from '../api/apiConstants';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
+import { getPreciseDistance } from 'geolib';
 const { url } = apiConstants;
 // inititilise location tracking
-var watchId = null;
+var recordingWatchId = null;
+var checkStartProximityWatchId = null;
+var checkEndProximityWatchId = null;
 
-export const registerListeners = async ( trip_id) =>{
+const stopCheckStartProximity = () => {
+    Geolocation.clearWatch(checkStartProximityWatchId);
+}
+
+const stopCheckEndProximity = () => {
+    Geolocation.clearWatch(checkEndProximityWatchId);
+}
+
+const stopRecording = () =>{
+    Geolocation.clearWatch(recordingWatchId);
+}
+
+export const checkStartProximity = async ()  =>  {
+    console.log("Route service: starting check proximity ====>");
+    try {
+        
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if( permitedFineLocation == true)
+        {
+            
+            checkStartProximityWatchId = Geolocation.watchPosition(
+                async(success)=>{
+                    
+                    const { latitude, longitude } = success.coords;
+                    let routeState = await getRouteState();
+                    let currentLocation = {
+                        latitude,
+                        longitude
+                    }
+                    const startProximity = await getPreciseDistance(routeState.startLocation,currentLocation);
+                    console.log("route service: start proximity: " + startProximity);
+
+                    if(startProximity < 100) // 100 meters
+                    {
+                        stopCheckStartProximity();
+                        startRecording();
+                        checkEndProximity();
+                    }
+                },
+                (error)=>{
+                    console.log(error);
+                },
+                {   
+                    enableHighAccuracy: true, 
+                    forceLocationManager: true,
+                    interval: 500,
+                    fastestInterval: 200
+                }
+            );
+        }
+        else
+        {
+            Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
+        }
+    } catch (error) {
+        Alert.alert("Device location", "Error: starting --checkStartCheckProximity");
+    }
+}
+
+export const checkEndProximity = async ()  =>  {
+    try {
+        
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if( permitedFineLocation == true)
+        {
+            checkEndProximityWatchId = Geolocation.watchPosition(
+                async(success)=>{
+                    
+                    const { latitude, longitude } = success.coords;
+                    let routeState = await getRouteState();
+                    let currentLocation = {
+                        latitude,
+                        longitude
+                    }
+                    const endProximity = await getPreciseDistance(routeState.endLocation,currentLocation);
+                    console.log("route service: end proximity: " + endProximity);
+
+                    if(endProximity < 100) // 100 meters
+                    {
+                        await stopCheckEndProximity();
+                        await stopRecording();
+                        await sendRouteData();
+                        stop();
+                    }
+                },
+                (error)=>{
+                    console.log(error);
+                },
+                {   
+                    enableHighAccuracy: true, 
+                    forceLocationManager: true,
+                    interval: 500,
+                    fastestInterval: 200
+                }
+            );
+        }
+        else
+        {
+            Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
+        }
+    } catch (error) {
+        Alert.alert("Device location", "Error: starting --checkStartCheckProximity");
+    }
+}
+
+export const  startRecording = async () =>{
     try {
 
         let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
         if( permitedFineLocation == true)
         {
-            // get initial location
-            Geolocation.getCurrentPosition(
+            recordingWatchId = Geolocation.watchPosition(
                 (success)=>{
-
-                    //console.log (" started calcuating route =====> ");
-
                     const { latitude, longitude } = success.coords;
-                    // set initial tracking state, current location as previous location
-                    setRouteState({
-                        route: [`${latitude},${longitude}`],
-                        trip_id
-                    });
-
-                    watchId = Geolocation.watchPosition(
-                        (success)=>{
-                            
-                            const { latitude, longitude } = success.coords;
-                            recordRouteTravelled({latitude, longitude});
-                        },
-                        (error)=>{
-                            console.log(error);
-                        },
-                        {   
-                            enableHighAccuracy: true, 
-                            distanceFilter: 75,
-                            forceLocationManager: false,
-                            interval: 10000,
-                            fastestInterval: 5000
-                        }
-                    );
+                    recordRouteTravelled({latitude, longitude});
                 },
                 (error)=>{
                     console.log(error);
                 },
-                {
+                {   
                     enableHighAccuracy: true, 
-                    distanceFilter: 50,
-                    forceLocationManager: false,
+                    distanceFilter: 75,
+                    forceLocationManager: true,
+                    interval: 10000,
+                    fastestInterval: 5000
                 }
             );
         }
@@ -65,71 +149,89 @@ export const registerListeners = async ( trip_id) =>{
     }
 }
 
-export const removeListeners = () =>{
-    // stop observing
-    Geolocation.clearWatch(watchId);
-    // clear previous listeners  if any
-    Geolocation.stopObserving();
-}
-
 export async function recordRouteTravelled(currentLocation)
 {
     // get tracking state state
     let routeState = await getRouteState();
+    //console.log("Route service location: " + `${currentLocation.latitude},${currentLocation.longitude}`);
+    routeState.route.push(`${currentLocation.latitude},${currentLocation.longitude}`);
+    setRouteState(routeState);
+}
 
-    if(routeState != null)
+
+
+export async function start(trip_id)
+{    
+    console.log("starting route service ~~~!!!");
+    if (ReactNativeForegroundService.is_running())
     {
-        //console.log("Route location: " + `${currentLocation.latitude},${currentLocation.longitude}`);
-        routeState.route.push(`${currentLocation.latitude},${currentLocation.longitude}`);
-        setRouteState(routeState);
+        if(ReactNativeForegroundService.is_task_running("RoutingService"))
+        {
+            // remove the task
+            await ReactNativeForegroundService.remove_task("RoutingService");
+        }
+
+        //initialise route state
+        await initialiseState(trip_id);
+        // add new task with the new parameters
+        await ReactNativeForegroundService.add_task(() =>{
+            checkStartProximity();
+        }, 
+        {
+            delay: 500,
+            onLoop: false,
+            taskId: "RoutingService",
+            onError: (e) => console.log(`Error logging routing service:`, e),
+        });
+    }
+    else
+    {
+        //initialise route state
+        await initialiseState(trip_id);
+
+        // add new task with the new parameters
+        await ReactNativeForegroundService.add_task(() =>{
+            checkStartProximity();
+        }, 
+        {
+            delay: 500,
+            onLoop: false,
+            taskId: "RoutingService",
+            onError: (e) => console.log(`Error logging routing service:`, e)
+        });
+
+        ReactNativeForegroundService.start({
+            id: 144,
+            title: "Etapath Location Service",
+            message: "Accessing your location!",
+            visibility: "private"
+        });
+    
     }
 }
 
-export async function startRecordingRouteAction(trip_id)
-{
-    const routeState = await getRouteState();
-    if(routeState == null)
+export const stop = async () =>{
+    await removeRouteState();
+    await stopCheckEndProximity();
+    await stopCheckStartProximity();
+    await stopRecording();
+
+    //console.log("is running tracking service " + ReactNativeForegroundService.is_task_running("TrackingService"));
+
+    if(ReactNativeForegroundService.is_task_running("RoutingService"))
     {
-        if (ReactNativeForegroundService.is_running() && ReactNativeForegroundService.is_task_running("RoutingService"))
-        {
-            // if service is running and task is running remove the task
-            await ReactNativeForegroundService.remove_task("RoutingService");
-
-            // add new task with the new parameters
-            await ReactNativeForegroundService.add_task(() =>{
-                registerListeners(trip_id);
-            }, 
-            {
-                delay: 2000,
-                onLoop: false,
-                taskId: "RoutingService",
-                onError: (e) => console.log(`Error logging routing service:`, e),
-            });
-
-        }
-        else
-        {
-            await ReactNativeForegroundService.add_task(() =>{
-                registerListeners(trip_id);
-            }, 
-            {
-                delay: 2000,
-                onLoop: false,
-                taskId: "RoutingService",
-                onError: (e) => console.log(`Error logging routing service:`, e),
-            });
-
-            ReactNativeForegroundService.start({
-                id: 144,
-                title: "Etapath Location Service",
-                message: "Accessing your location!",
-                visibility: "private"
-            });
-        }
+        // remove the task
+        await ReactNativeForegroundService.remove_task("RoutingService");
     }
 
+    let tasks = await ReactNativeForegroundService.get_all_tasks();
+    //console.log("route service: " + JSON.stringify(Object.keys(tasks)));
 
-    
+    if(tasks && Object.keys(tasks).length == 0)
+    {
+        console.log("stopping in route service");
+        ReactNativeForegroundService.stop();
+    }
 }
 
 // set tracking state
@@ -170,24 +272,8 @@ export const removeRouteState = async () =>{
     }
 }
 
-export const resetRouteService = async () =>{
-    //console.log("resetting route service");
-    try {
-        await removeListeners();
-        await removeRouteState();
-    }
-    catch(e){
-        console.log("failed to reset route service");
-        console.log(e);
-    }
+export const sendRouteData = async () =>{
     
-}
-
-export const stopRouteService = async () =>{
-    
-    // remove route listeners
-    removeListeners();
-
     // update actual distance travelled on the  database
     const routeState = await getRouteState();
     const userToken =  await getUserToken();
@@ -197,24 +283,16 @@ export const stopRouteService = async () =>{
         let trip_id = routeState.trip_id;
         let route = routeState.route.join('|');
 
-        axios.post(`${url}/api_grouped_trips/set_route`,
-        {
-            id: trip_id,
-            route
-        },
-        {
-            headers:{
-                'Authorization': `Bearer ${userToken}`
-            }
-        }
-        )
-        .then(async (res)=>{
-            removeRouteState();
-            ReactNativeForegroundService.stop();
-        })
-        .catch((e)=>{
-            console.log(e);
-        });
+        const response = await axios.post(`${url}/api_grouped_trips/set_route`,
+                                {
+                                    id: trip_id,
+                                    route
+                                },
+                                {
+                                    headers:{
+                                        'Authorization': `Bearer ${userToken}`
+                                    }
+                                });
     }
 }
 
@@ -229,4 +307,25 @@ const getUserToken = async () =>{
 
     return userToken;
 } 
+
+const initialiseState = async (trip_id) => {
+    const userToken =  await getUserToken();
+    const response = await axios.post(`${url}/api_grouped_trips/trip_route_data`,
+                        {
+                            id: trip_id,
+                        },
+                        {
+                            headers:{
+                                'Authorization': `Bearer ${userToken}`
+                            }
+                        });
+    console.log(response.data);
+
+    await setRouteState({
+        trip_id,
+        route: [],
+        startLocation: response.data.start_location,
+        endLocation: response.data.end_location
+    });
+}
 

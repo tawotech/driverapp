@@ -12,6 +12,8 @@ import {
   saveFcmTokenAction
 } from './src/navigations/modules/navigation'
 
+import { updateTripDataAction } from './src/routes/viewtrip/modules/viewTrip';
+
 import PushNotification from "react-native-push-notification";
 import { getGroupedTripsAction } from './src/routes/trips/modules/trips';
 import {Alert} from 'react-native'
@@ -30,12 +32,22 @@ const handleNotification = (notification) =>{
       date: new Date(Date.now()),
       data: {
         openedInForeground: true
-      }
+      },
+      //actions: ['Accept', 'Decline']
       //allowWhileIdle: true,
       //userInteraction: false
     })
   }
-  dispatch(getGroupedTripsAction());
+
+  if(notification.data.hasOwnProperty("type"))
+  {
+    if(notification.data.type == "trip_cancelled")
+    {
+      dispatch(updateTripDataAction(notification.data.id))
+    }
+    dispatch(getGroupedTripsAction());
+  }
+   
 }
 
 PushNotification.configure({

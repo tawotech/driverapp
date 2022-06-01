@@ -10,12 +10,13 @@ import { Linking, Alert } from 'react-native';
 import PushNotification from 'react-native-push-notification'
 import * as WidgetService from '../../../Services/WidgetService';
 import * as TrackingService from '../../../Services/TrackingService';
+import * as RouteService from '../../../Services/RouteService';
 import OverlayPermissionModule from "rn-android-overlay-permission";
-import { 
-    startRecordingRouteAction,
-    stopRouteService,
-    resetRouteService
-} from '../../../Services/RouteService';
+/*import { 
+    //startRecordingRouteAction,
+    //stopRouteService
+    sta
+} from '../../../Services/RouteService';*/
 
 const {
     startWidgetService,
@@ -24,12 +25,6 @@ const {
     setWidgetState,
     isWidgetOpen
 } = WidgetService;
-
-const {
-    startCalculatingDistanceAction,
-    //stopTrackingService,
-    //getTrackingState
-} = TrackingService;
 
 const { url } = apiConstants;
 // login initial state
@@ -138,6 +133,16 @@ export function passengerIsLoadingAction(passengerIsLoading) {
                 passengerIsLoading
             }
         })
+    }
+}
+
+export function updateTripDataAction(id){
+    return (dispatch, store) => {
+        const trip_id = store().viewTrip.trip_id;
+        if(trip_id == id)
+        {
+            dispatch(getTripDataAction(id))        
+        }
     }
 }
 
@@ -262,8 +267,6 @@ export function onRouteAction() {
         )
             .then(async (res) => {
                 
-
-                resetRouteService();
                 let passenger = res.data.passenger;
                 let trip = trips.filter((trip) => trip.id == passenger);
 
@@ -325,7 +328,10 @@ export function onRouteAction() {
                 let endLocation =  destLatLng;
 
                 // start tracking service here
-                startCalculatingDistanceAction(startLocation,endLocation,trip_id);
+                TrackingService.start(trip_id);
+
+                // start route service here
+                RouteService.start(trip_id);
 
                 // open in google maps here
 
@@ -476,7 +482,7 @@ export function completeTripAction() {
                 });
 
                 //attempt to start route tracking service
-                startRecordingRouteAction(trip_id);
+                //startRecordingRouteAction(trip_id);
 
                 dispatch(getPassengerAction());
             })
@@ -515,7 +521,7 @@ export function skipTripAction() {
                 });
 
                 //attempt to start route tracking service
-                startRecordingRouteAction(trip_id);
+                //startRecordingRouteAction(trip_id);
 
                 setTimeout(() => {
                     dispatch(getPassengerAction());
@@ -562,7 +568,10 @@ export function endTripAction() {
                 }
 
                 //stop route service
-                stopRouteService();
+                //stopRouteService();
+                RouteService.stop();
+                TrackingService.stop();
+
             })
             .catch((e) => {
                 console.log(e);
@@ -719,7 +728,7 @@ export function allTripsOnRouteAction() {
                 }
 
                 //attempt to start route tracking service
-                startRecordingRouteAction(trip_id);
+                //startRecordingRouteAction(trip_id);
             })
             .catch((e) => {
                 console.log(e);

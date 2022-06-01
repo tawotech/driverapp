@@ -186,4 +186,4 @@ const TripComponent = ({
         </Pressable>
     )
 }
-export default TripComponent
+export default TripComponent;

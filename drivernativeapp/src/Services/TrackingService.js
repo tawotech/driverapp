@@ -8,58 +8,143 @@ const { url } = apiConstants;
 import { showTracking } from './WidgetService';
 import ReactNativeForegroundService from "@supersami/rn-foreground-service";
 
-var watchId = null; 
+var trackingWatchId = null;
+var checkStartProximityWatchId = null;
+var checkEndProximityWatchId = null;
 
-export const registerListeners = async ( startLocation, endLocation, trip_id) =>{
+const stopCheckStartProximity = () => {
+    Geolocation.clearWatch(checkStartProximityWatchId);
+}
+
+const stopCheckEndProximity = () => {
+    Geolocation.clearWatch(checkEndProximityWatchId);
+}
+
+const stopTracking = () =>{
+    Geolocation.clearWatch(trackingWatchId);
+}
+
+export const checkStartProximity = async ()  =>  {
+    console.log("Tracking service: starting check proximity ====>");
+    try {
+        
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if( permitedFineLocation == true)
+        {
+            
+            checkStartProximityWatchId = Geolocation.watchPosition(
+                async(success)=>{
+                    
+                    const { latitude, longitude } = success.coords;
+                    let trackingState = await getTrackingState();
+                    let currentLocation = {
+                        latitude,
+                        longitude
+                    }
+                    const startProximity = await getPreciseDistance(trackingState.startLocation,currentLocation);
+                    console.log("Tracking service: start proximity: " + startProximity);
+
+                    if(startProximity < 400) // 400 meters
+                    {
+                        stopCheckStartProximity();
+                        // set prev location in routing state
+
+                        trackingState.prevLocation = currentLocation;
+                        await setTrackingState(trackingState);
+                        startTracking();
+                        checkEndProximity();
+                        showTracking(true);
+                    }
+                },
+                (error)=>{
+                    console.log(error);
+                },
+                {   
+                    enableHighAccuracy: true, 
+                    forceLocationManager: true,
+                    interval: 500,
+                    fastestInterval: 200
+                }
+            );
+        }
+        else
+        {
+            Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
+        }
+    } catch (error) {
+        Alert.alert("Device location", "Error: starting --checkStartCheckProximity");
+    }
+}
+
+export const checkEndProximity = async ()  =>  {
+    try {
+        
+        let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if( permitedFineLocation == true)
+        {
+            checkEndProximityWatchId = Geolocation.watchPosition(
+                async(success)=>{
+                    
+                    const { latitude, longitude } = success.coords;
+                    let trackingState = await getTrackingState();
+                    let currentLocation = {
+                        latitude,
+                        longitude
+                    }
+                    const endProximity = await getPreciseDistance(trackingState.endLocation,currentLocation);
+                    console.log("Tracking service: end proximity: " + endProximity);
+
+                    if(endProximity < 400) // 400 meters
+                    {
+                        await stopCheckEndProximity();
+                        await stopTracking();
+                        await sendTrackingData();
+                        showTracking(false);
+                        stop();
+                    }
+                },
+                (error)=>{
+                    console.log(error);
+                },
+                {   
+                    enableHighAccuracy: true, 
+                    forceLocationManager: true,
+                    interval: 500,
+                    fastestInterval: 200
+                }
+            );
+        }
+        else
+        {
+            Alert.alert("Device location", "App location permission is not granted, please go to your settings and grant <allow all the time> to enable distance tracking");
+        }
+    } catch (error) {
+        Alert.alert("Device location", "Error: starting --checkStartCheckProximity");
+    }
+}
+
+
+export const startTracking = async () =>{
     try {
 
         let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
         if(permitedFineLocation == true)
         {
-            // get initial location
-            Geolocation.getCurrentPosition(
+            trackingWatchId = Geolocation.watchPosition(
                 (success)=>{
+                    
                     const { latitude, longitude } = success.coords;
-                    // set initial tracking state, current location as previous location
-                    setTrackingState({
-                        prevLocation: {
-                            latitude,
-                            longitude
-                        },
-                        distanceTravelled: 0,
-                        startedTracking: false,
-                        endedTracking: false,
-                        startLocation,
-                        endLocation,
-                        trip_id
-                    });
-
-                    watchId = Geolocation.watchPosition(
-                        (success)=>{
-                            
-                            const { latitude, longitude } = success.coords;
-                            calculateDistanceTravelled({latitude, longitude});
-                        },
-                        (error)=>{
-                            console.log(error);
-                        },
-                        {   
-                            enableHighAccuracy: true, 
-                            distanceFilter: 75,
-                            forceLocationManager: false,
-                            interval: 10000,
-                            fastestInterval: 5000
-                        }
-                    );
+                    calculateDistanceTravelled({latitude, longitude});
                 },
                 (error)=>{
-                    console.log("error registering listeners");
                     console.log(error);
                 },
-                {
+                {   
                     enableHighAccuracy: true, 
-                    distanceFilter: 50,
-                    forceLocationManager: false,
+                    distanceFilter: 75,
+                    forceLocationManager: true,
+                    interval: 10000,
+                    fastestInterval: 5000
                 }
             );
         }
@@ -73,87 +158,38 @@ export const registerListeners = async ( startLocation, endLocation, trip_id) =>
     }
 }
 
-export const removeListeners = () =>{
-    // stop observing
-    //Geolocation.stopObserving();
-    Geolocation.clearWatch(watchId);
-}
 
 export async function calculateDistanceTravelled(currentLocation)
 {
     // get tracking state state
     let trackingState = await getTrackingState();
+    const { distanceTravelled, prevLocation } = trackingState;
 
-    if(trackingState != null && trackingState.endedTracking == true)
-    {
-        // remove listeners here
-        removeListeners();
-        stopTrackingService();
-        return;
-    }
+    const pointToPointDist = await getPreciseDistance(prevLocation,currentLocation); 
+    let newDistanceTravelled = distanceTravelled + pointToPointDist;
 
-    // check for startLocation proximity
-    if(trackingState != null && trackingState.startedTracking == false)
-    {
-        const startProximity = await getPreciseDistance(trackingState.startLocation,currentLocation);
-        console.log("start proximity: " + startProximity);
+    // update state
+    trackingState.distanceTravelled = newDistanceTravelled;
+    trackingState.prevLocation = currentLocation;
 
-        if(startProximity < 400) // set proximity check to 100 meters
-        {
-            // set started tracking to true
-            trackingState.startedTracking = true;
-            // keep track of the prevLocation
-            trackingState.prevLocation = currentLocation;
-            //console.log("tracking state: " + JSON.stringify(trackingState));
-            //Alert.alert("Tracking Service", "Tracking Service has started");
-            //console.log("tracking started");
-            showTracking(true);
-
-        }
-    }
-
-    if (trackingState != null && trackingState.startedTracking == true && trackingState.endedTracking == false)
-    {
-        const { distanceTravelled, prevLocation } = trackingState;
-
-        const pointToPointDist = await getPreciseDistance(prevLocation,currentLocation); 
-        let newDistanceTravelled = distanceTravelled + pointToPointDist;
-
-        // update state
-        trackingState.distanceTravelled = newDistanceTravelled;
-        trackingState.prevLocation = currentLocation;
-
-        //console.log("distance: " + newDistanceTravelled)
-        // check for endLocation proximity
-        const endProximity = await getPreciseDistance(trackingState.endLocation,currentLocation);
-        //console.log("end proximity: " + endProximity + " distance moved: " +  pointToPointDist + " accumulated " + newDistanceTravelled);
-        if(endProximity < 400)
-        {
-            trackingState.endedTracking = true;
-        }
-    }
-
-
-    if(trackingState != null)
-    {
-        //console.log("setting tracking state");
-        setTrackingState(trackingState);
-    }
+    setTrackingState(trackingState);
 }
 
-export async function startCalculatingDistanceAction(startLocation, endLocation, trip_id)
+export async function start(trip_id)
 {
-    if (ReactNativeForegroundService.is_running() && ReactNativeForegroundService.is_task_running("TrackingService"))
+    if (ReactNativeForegroundService.is_running())
     {
-        // if service is running and task is running remove the task
-        await ReactNativeForegroundService.remove_task("TrackingService");
+        await stop();
+
+        //initialise tracking state
+        await initialiseState(trip_id);
 
         // add new task with the new parameters
         await ReactNativeForegroundService.add_task(() =>{
-            registerListeners(startLocation,endLocation,trip_id);
+            checkStartProximity();
         }, 
         {
-            delay: 2000,
+            delay: 500,
             onLoop: false,
             taskId: "TrackingService",
             onError: (e) => console.log(`Error logging:`, e),
@@ -162,11 +198,14 @@ export async function startCalculatingDistanceAction(startLocation, endLocation,
     }
     else
     {
+        //initialise tracking state
+        await initialiseState(trip_id);
+
         await ReactNativeForegroundService.add_task(() =>{
-            registerListeners(startLocation,endLocation,trip_id);
+            checkStartProximity();
         }, 
         {
-            delay: 2000,
+            delay: 500,
             onLoop: false,
             taskId: "TrackingService",
             onError: (e) => console.log(`Error logging:`, e),
@@ -220,7 +259,7 @@ export const removeTrackingState = async () =>{
     }
 }
 
-export const stopTrackingService = async () =>{
+export const sendTrackingData = async () =>{
     
     // update actual distance travelled on the  database
     const trackingState = await getTrackingState();
@@ -231,7 +270,7 @@ export const stopTrackingService = async () =>{
         let actual_total_distance = `${(trackingState.distanceTravelled/1000).toFixed(1)} km`;
         let trip_id = trackingState.trip_id;
 
-        axios.post(`${url}/api_grouped_trips/set_actual_total_distance`,
+        const response =  await axios.post(`${url}/api_grouped_trips/set_actual_total_distance`,
         {
             id: trip_id,
             actual_total_distance,
@@ -240,21 +279,6 @@ export const stopTrackingService = async () =>{
             headers:{
                 'Authorization': `Bearer ${userToken}`
             }
-        }
-        )
-        .then(async (res)=>{
-
-            // remove
-            //Alert.alert("Tracking Service", "Tracking Service has end");
-            //console.log("tracking ended");
-            showTracking(false);
-
-            removeListeners();
-            removeTrackingState();
-            ReactNativeForegroundService.remove_task("TrackingService");
-        })
-        .catch((e)=>{
-            console.log(e);
         });
     }
 }
@@ -269,5 +293,45 @@ const getUserToken = async () =>{
     }
 
     return userToken;
-} 
+}
 
+const initialiseState = async (trip_id) => {
+    const userToken =  await getUserToken();
+    const response = await axios.post(`${url}/api_grouped_trips/trip_route_data`,
+                        {
+                            id: trip_id,
+                        },
+                        {
+                            headers:{
+                                'Authorization': `Bearer ${userToken}`
+                            }
+                        });
+    await setTrackingState({
+        trip_id,
+        distanceTravelled: 0,
+        prevLocation: null,
+        startLocation: response.data.start_location,
+        endLocation: response.data.end_location
+    });
+}
+
+export const stop = async () =>{
+    await removeTrackingState();
+    await stopCheckEndProximity();
+    await stopCheckStartProximity();
+    await stopTracking();
+
+    console.log("is running route service" +  ReactNativeForegroundService.is_task_running("RouteService"));
+    if(ReactNativeForegroundService.is_task_running("TrackingService"))
+    {
+        // remove the task
+        await ReactNativeForegroundService.remove_task("TrackingService");
+    }
+
+    let tasks = await ReactNativeForegroundService.get_all_tasks();
+    console.log("Tracking service: " + JSON.stringify(Object.keys(tasks)));
+    if(tasks && Object.keys(tasks).length == 0)
+    {
+        ReactNativeForegroundService.stop();
+    }
+}
