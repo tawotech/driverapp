@@ -3,7 +3,6 @@
 import React from 'react';
 import {Provider} from 'react-redux'
 
-import createStore from './src/store/createStore'
 import NavContainer from './src/navigations/containers/NavContainer';
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import axios from 'axios'
@@ -16,10 +15,7 @@ import { updateTripDataAction } from './src/routes/viewtrip/modules/viewTrip';
 
 import PushNotification from "react-native-push-notification";
 import { getGroupedTripsAction } from './src/routes/trips/modules/trips';
-import {Alert} from 'react-native'
-
-const initialState = window.__INITIAL_STATE__;
-const store = createStore (initialState);
+import store from './src/store/createStore'
 const {dispatch} = store;
 
 const handleNotification = (notification) =>{

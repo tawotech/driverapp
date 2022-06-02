@@ -14,6 +14,7 @@ import Options from './options/Options';
 import { AppState, Alert, PermissionsAndroid,Platform } from 'react-native';
 import OverlayPermissionModule from "rn-android-overlay-permission";
 import Disclosure from './disclosure/Disclosure'
+import PassengerArrived from './passengerArrived/PassengerArrived';
 
 const ViewTrip = ({
     navigation,
@@ -48,7 +49,9 @@ const ViewTrip = ({
     skipTripAction,
     allTripsOnRoute,
     allTripsOnRouteAction,
-    refreshTripAction
+    refreshTripAction,
+    showPassengerArrived,
+    passengerArrived
 }) =>
 {
 
@@ -244,6 +247,13 @@ const ViewTrip = ({
                 showDisclosure &&
                 <Disclosure
                     setShowDisclosure={setShowDisclosure}
+                />
+            }
+
+            {
+                passengerArrived &&
+                <PassengerArrived 
+                    showPassengerArrived={showPassengerArrived}
                 />
             }
         </Center>

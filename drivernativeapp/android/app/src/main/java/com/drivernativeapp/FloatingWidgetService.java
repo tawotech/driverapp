@@ -44,6 +44,7 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
             passengerView, yesNoView,
             endTripView,pickupAllPassengersView,
             pickupAllPassengers,
+            arrivedPassengerView,
             removeFloatingWidgetView;
     private static TextView passengerName,
             passengerAddress,yesNoText,
@@ -241,6 +242,8 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         // find tracking text
         trackingText = mFloatingWidgetView.findViewById(R.id.floating_widget_tracking_text);
 
+        // find arrived at passenger view
+        arrivedPassengerView =mFloatingWidgetView.findViewById(R.id.arrived_passenger_view);
     }
 
     private void getWindowManagerDefaultDisplay() {
@@ -449,6 +452,29 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         }
     }
 
+    private static void showArrivedPassengerView(boolean show){
+        if(show == true)
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    collapsedView.setVisibility(View.GONE);
+                    expandedView.setVisibility(View.VISIBLE);
+                    arrivedPassengerView.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+        else
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    arrivedPassengerView.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
     public static void handleAction (ActionObject action)
     {
         bound = action.getBound();
@@ -457,21 +483,30 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         switch (action.getType()){
             case ActionObject.UPDATE_PASSENGER:
                 updatePassengerDetails(action);
+                showArrivedPassengerView(false);
                 break;
             case ActionObject.PICK_ALL_PASSENGERS:
                 showPickupAllPassengers(action);
+                showArrivedPassengerView(false);
                 break;
             case ActionObject.TRIPS_COMPLETED:
                 showEndTripButton(action);
+                showArrivedPassengerView(false);
                 break;
             case ActionObject.END_TRIP:
                 onTripEnded(action);
+                showArrivedPassengerView(false);
                 break;
             case ActionObject.START_TRACKING:
                 showTrackingText(true);
+                showArrivedPassengerView(false);
+                break;
+            case ActionObject.ARRIVED_PASSENGER:
+                showArrivedPassengerView(true);
                 break;
             case ActionObject.END_TRACKING:
                 showTrackingText(false);
+                showArrivedPassengerView(false);
                 break;
         }
     }

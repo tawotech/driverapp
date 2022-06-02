@@ -11,6 +11,7 @@ import PushNotification from 'react-native-push-notification'
 import * as WidgetService from '../../../Services/WidgetService';
 import * as TrackingService from '../../../Services/TrackingService';
 import * as RouteService from '../../../Services/RouteService';
+import * as PassengerProximityService from '../../../Services/PassengerProximityService'
 import OverlayPermissionModule from "rn-android-overlay-permission";
 /*import { 
     //startRecordingRouteAction,
@@ -53,7 +54,8 @@ const initialState = {
     currentLocation: null,
     prevLocation: null,
     startCalculatingDistance: false,
-    allTripsOnRoute: "false"
+    allTripsOnRoute: "false",
+    passengerArrived: false, 
 }
 
 /**
@@ -78,7 +80,8 @@ const {
     CALCULATE_DISTANCE_TRAVELLED,
     START_CALCULATING_DISTANCE,
     ALL_TRIPS_ON_ROUTE,
-    UPDATE_WIDGET_STATUS
+    UPDATE_WIDGET_STATUS,
+    PASSENGER_ARRIVED
 } = actionConstants;
 const MONTH_OF_THE_YEAR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -131,6 +134,17 @@ export function passengerIsLoadingAction(passengerIsLoading) {
             type: PASSENGER_IS_LOADING,
             payload: {
                 passengerIsLoading
+            }
+        })
+    }
+}
+
+export function showPassengerArrived(passengerArrived) {
+    return (dispatch, store) => {
+        dispatch({
+            type: PASSENGER_ARRIVED,
+            payload: {
+                passengerArrived
             }
         })
     }
@@ -332,6 +346,9 @@ export function onRouteAction() {
 
                 // start route service here
                 RouteService.start(trip_id);
+
+                // start passenger proximity service
+                PassengerProximityService.start({trip_id,dispatch})
 
                 // open in google maps here
 
@@ -571,6 +588,7 @@ export function endTripAction() {
                 //stopRouteService();
                 RouteService.stop();
                 TrackingService.stop();
+                PassengerProximityService.stop();
 
             })
             .catch((e) => {
@@ -871,6 +889,12 @@ function handleStartCalculatingDistance(state, action) {
     })
 }
 
+function handlePassengerArrived(state, action) {
+    return update(state, {
+        passengerArrived: { $set: action.payload.passengerArrived },
+    })
+}
+
 const ACTION_HANDLERS = {
     GET_TRIP_DATA: handleGetTripData,
     ACCEPT_TRIP: handleAcceptTrip,
@@ -887,6 +911,7 @@ const ACTION_HANDLERS = {
     GET_INITIAL_LOCATION: handleGetInitialLocation,
     START_CALCULATING_DISTANCE: handleStartCalculatingDistance,
     ALL_TRIPS_ON_ROUTE: handleAllTripsOnRoute,
+    PASSENGER_ARRIVED: handlePassengerArrived
 }
 
 export function ViewTripReducer(state = initialState, action) {

@@ -33,4 +33,7 @@
 
     <string name="decline_button_text">Decline</string>
     <string name="floating_widget_tracking_label">Tracking</string>
+
+    <string name="arrived_passenger_text">You have arrived please confirm your trip!</string>
+
 </resources>

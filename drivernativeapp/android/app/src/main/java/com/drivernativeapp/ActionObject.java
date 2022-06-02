@@ -9,6 +9,8 @@ public class ActionObject {
 
     public static final String START_TRACKING = "START_TRACKING";
     public static final String END_TRACKING = "END_TRACKING";
+    public static final String ARRIVED_PASSENGER = "ARRIVED_PASSENGER";
+
 
 
     private String location;

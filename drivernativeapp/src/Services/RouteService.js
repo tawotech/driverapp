@@ -319,7 +319,6 @@ const initialiseState = async (trip_id) => {
                                 'Authorization': `Bearer ${userToken}`
                             }
                         });
-    console.log(response.data);
 
     await setRouteState({
         trip_id,

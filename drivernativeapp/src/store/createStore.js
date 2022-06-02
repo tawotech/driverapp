@@ -11,7 +11,7 @@ import {createLogger} from 'redux-logger'
 
 const log = createLogger ({diff: true, collapsed: true});
 
-export default (initialState = {}) => {
+const generateStore  = (initialState = {}) => {
 
     const middleware = [thunk,log];
     const enhancers = [];
@@ -25,3 +25,6 @@ export default (initialState = {}) => {
     )
     return store;
 }
+
+const store = generateStore({});
+export default store;

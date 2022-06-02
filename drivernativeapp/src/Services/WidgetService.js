@@ -4,6 +4,7 @@ import apiConstants from '../api/apiConstants'
 import AsyncStorage from '@react-native-community/async-storage';
 import * as RouteService from './RouteService'
 import * as TrackingService from './TrackingService'
+import * as PassengerProximityService from '../Services/PassengerProximityService'
 
 /*import { 
     startRecordingRouteAction, 
@@ -13,9 +14,10 @@ import * as TrackingService from './TrackingService'
 export const TRIPS_COMPLETED = "TRIPS_COMPLETED";
 export const UPDATE_PASSENGER = "UPDATE_PASSENGER";
 export const PICK_ALL_PASSENGERS = "PICK_ALL_PASSENGERS";
-export const END_TRIP = "END_TRIP"
-export const START_TRACKING = "START_TRACKING"
-export const END_TRACKING = "END_TRACKING"
+export const END_TRIP = "END_TRIP";
+export const START_TRACKING = "START_TRACKING";
+export const END_TRACKING = "END_TRACKING";
+export const ARRIVED_PASSENGER = "ARRIVED_PASSENGER";
 
 
 const { CalendarModule } = NativeModules;
@@ -196,6 +198,7 @@ export async function widgetEndTripAction()
        //stopRouteService();
        RouteService.stop();
        TrackingService.stop();
+       PassengerProximityService.stop();
     })
     .catch((e)=>{
         console.log(e);
@@ -320,6 +323,16 @@ export const showTracking = async (show) =>{
         {
             widgetPerformAction(END_TRACKING,widgetState);
         }
+    }
+}
+
+export const showArrivedPassenger = async () =>{
+    let widgetState = await getWidgetState();
+    let isOpen = await isWidgetOpen();
+
+    if(widgetState != null && isOpen)
+    {
+        widgetPerformAction(ARRIVED_PASSENGER,widgetState);
     }
 }
 
