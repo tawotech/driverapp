@@ -12,7 +12,7 @@ import {
 } from './src/navigations/modules/navigation'
 
 import { updateTripDataAction } from './src/routes/viewtrip/modules/viewTrip';
-
+import { onTripNotificationAction } from './src/routes/trips/modules/trips';
 import PushNotification from "react-native-push-notification";
 import { getGroupedTripsAction } from './src/routes/trips/modules/trips';
 import store from './src/store/createStore'
@@ -40,6 +40,10 @@ const handleNotification = (notification) =>{
     if(notification.data.type == "trip_cancelled")
     {
       dispatch(updateTripDataAction(notification.data.id))
+    }
+    else if(notification.data.type == "trip_booked")
+    {
+      dispatch(onTripNotificationAction(notification))
     }
     dispatch(getGroupedTripsAction());
   }

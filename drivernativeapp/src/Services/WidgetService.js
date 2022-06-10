@@ -28,6 +28,8 @@ var declineListener;
 var endTripListener;
 var widgetStatusListener;
 var pickupAllPassengersListener;
+var widgetDispatch = null;
+import { showQueryAction } from '../routes/viewtrip/modules/viewTrip';
 
 export const removeWidgetListeners = () =>
 {
@@ -199,6 +201,7 @@ export async function widgetEndTripAction()
        RouteService.stop();
        TrackingService.stop();
        PassengerProximityService.stop();
+       widgetDispatch(showQueryAction(true));
     })
     .catch((e)=>{
         console.log(e);
@@ -237,12 +240,13 @@ export async function widgetAllTripsOnRouteAction()
 
 // start widget service
 export const startWidgetService = (widgetState) =>{
-
     const {
         passengerBound,
         status,
-        allTripsOnRoute
+        allTripsOnRoute,
+        dispatch
     } = widgetState;
+    widgetDispatch = dispatch;
 
     if(status == "on_route")
     {

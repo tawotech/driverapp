@@ -1,6 +1,7 @@
 import React, {useState, useContext, useEffect} from 'react'
-import Header from '../../../components/Header';
 import TripComponent from './TripComponent';
+import Options from './options/Options';
+import NotificationPopup from './notifications/NotificationPopup';
 import {
     Box,
     Text,
@@ -25,7 +26,14 @@ const Trips = ({
     completeTrips,
     incompleteTrips,
     isLoading,
-    assignFcmTokenAction
+    assignFcmTokenAction,
+    notifications,
+    notificationTrip,
+    notificationTripIsLoading,
+    getNotificationTripDataAction,
+    closeTripNotificationAction,
+    notificationAcceptTripAction,
+    notificationDeclineTripAction
 }) =>
 {
 
@@ -39,6 +47,9 @@ const Trips = ({
             getGroupedTripsAction();
         },[]),
     );
+
+    const [showOptions, setShowOptions] = useState(false);
+    const [optionsData, setOptionsData] = useState({});
 
     const viewTrip = (tripId) =>{
         navigation.navigate("viewTrip",{
@@ -111,8 +122,29 @@ const Trips = ({
                 )}
                 refreshing={isLoading}
                 onRefresh={()=>getGroupedTripsAction()}
-            >
-            </SectionList>
+            />
+            {
+                (notifications.length != 0) &&
+                <NotificationPopup
+                    notification={notifications[0]}
+                    notificationTrip={notificationTrip}
+                    notificationTripIsLoading={notificationTripIsLoading}
+                    getNotificationTripDataAction={getNotificationTripDataAction} 
+                    setShowOptions={setShowOptions}
+                    setOptionsData={setOptionsData}
+                    closeTripNotificationAction={closeTripNotificationAction}
+                />
+            }
+            {
+                showOptions &&
+                <Options
+                    setShowOptions={setShowOptions}
+                    optionsData={optionsData}
+                    declineTripAction={()=>notificationDeclineTripAction()}
+                    acceptTripAction={()=>notificationAcceptTripAction()}
+                />
+            }
+
         </Box>
     )
 }

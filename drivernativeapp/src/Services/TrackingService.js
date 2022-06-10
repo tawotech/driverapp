@@ -62,8 +62,9 @@ export const checkStartProximity = async ()  =>  {
                 {   
                     enableHighAccuracy: true, 
                     forceLocationManager: true,
-                    interval: 500,
-                    fastestInterval: 200
+                    interval: 5000, // 5 seconds 
+                    fastestInterval: 4000, // 4 seconds
+                    distanceFilter: 0 // don't filter with distance
                 }
             );
         }
@@ -109,8 +110,9 @@ export const checkEndProximity = async ()  =>  {
                 {   
                     enableHighAccuracy: true, 
                     forceLocationManager: true,
-                    interval: 500,
-                    fastestInterval: 200
+                    interval: 5000, //5 seconds
+                    fastestInterval: 4000, // 4 seconds
+                    distanceFilter: 0
                 }
             );
         }
@@ -141,10 +143,10 @@ export const startTracking = async () =>{
                 },
                 {   
                     enableHighAccuracy: true, 
-                    distanceFilter: 75,
+                    distanceFilter: 30, // 30 meters
                     forceLocationManager: true,
-                    interval: 10000,
-                    fastestInterval: 5000
+                    interval: 5000, // 5 seconds
+                    fastestInterval: 4000, // 4 seconds
                 }
             );
         }
@@ -172,7 +174,7 @@ export async function calculateDistanceTravelled(currentLocation)
     trackingState.distanceTravelled = newDistanceTravelled;
     trackingState.prevLocation = currentLocation;
 
-    setTrackingState(trackingState);
+    await setTrackingState(trackingState);
 }
 
 export async function start(trip_id)

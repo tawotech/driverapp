@@ -8,6 +8,8 @@ import { getPreciseDistance } from 'geolib';
 const { url } = apiConstants;
 import * as WidgetService from './WidgetService' 
 import { showPassengerArrived } from '../routes/viewtrip/modules/viewTrip';
+import NotificationSounds, { playSampleSound } from 'react-native-notification-sounds';
+
 var proximityDispatch = null;
 //const store =  require('../store/createStore');
 //import store from '../store/createStore'
@@ -17,6 +19,7 @@ var checkProximityWatchId = null;
 const stopCheckProximity = () =>{
     Geolocation.clearWatch(checkProximityWatchId);
 }
+
 
 export const startCheckProximity = async ()  =>  {
     try {
@@ -69,14 +72,23 @@ export const startCheckProximity = async ()  =>  {
                         });
 
                         let updatedTrips = [];
+                        let widgetIsOpen = await WidgetService.isWidgetOpen();
+
                         proximities.forEach((proximity)=>{
                             if(proximity.distance < 200)
                             {
                                 // how promt
-                                console.log("arrived to passenger");
-                                WidgetService.showArrivedPassenger();
-                                Vibration.vibrate(2 * ONE_SECOND_IN_MS)
-                                proximityDispatch(showPassengerArrived(true));
+                                WidgetService.showArrivedPassenger();                              
+                                console.log("widget is open: " + JSON.stringify(widgetIsOpen));
+                                if( widgetIsOpen == false ) // if widget is closed
+                                {
+                                    console.log("dispatching passenger aarrived");
+                                    proximityDispatch(showPassengerArrived(true));
+                                }
+                                Vibration.vibrate(2 * ONE_SECOND_IN_MS);
+                                NotificationSounds.getNotifications('notification').then(soundsList  => {
+                                    playSampleSound(soundsList[1]);
+                                });
                             }
                             else
                             {
@@ -85,7 +97,7 @@ export const startCheckProximity = async ()  =>  {
                         });
 
                         proximityState.trips = updatedTrips;
-                        setProximityState(proximityState);
+                        await setProximityState(proximityState);
                     }
                     else
                     {
@@ -98,8 +110,9 @@ export const startCheckProximity = async ()  =>  {
                 {   
                     enableHighAccuracy: true, 
                     forceLocationManager: true,
-                    interval: 500,
-                    fastestInterval: 200
+                    interval: 5000, // 5 seconds
+                    fastestInterval: 4000, // 4 seconds
+                    distanceFilter: 0 // don't use distance filter
                 }
             );
         }
@@ -243,10 +256,20 @@ const initialiseState = async (trip_id) => {
                                 'Authorization': `Bearer ${userToken}`
                             }
                         });
-    console.log(response.data.trips);
+    let trips = response.data.trips;
+    let bound = trips[0].trip_type;
+    let endStartDummyTrip = {
+        id: "_startenddummytrip",
+        trip_type: bound,
+        location_latitude: (bound == "inbound") ? trips[0].destination_latitude : trips[0].location_latitude,
+        location_longitude: (bound == "inbound") ? trips[0].destination_longitude : trips[0].location_longitude,
+        destination_latitude: (bound == "inbound") ? trips[0].destination_latitude : trips[0].location_latitude,
+        destination_longitude: (bound == "inbound") ? trips[0].destination_longitude : trips[0].location_longitude,
+    }
 
+    trips.push(endStartDummyTrip);
     await setProximityState({
-        trips: response.data.trips
+        trips: trips
     });
 }
 

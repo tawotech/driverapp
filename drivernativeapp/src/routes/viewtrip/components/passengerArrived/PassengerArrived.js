@@ -6,8 +6,24 @@ import {
     HStack
   } from "native-base"
 
+import StatusComponent from '../status/StatusComponent' 
+
 const PassengerArrived = ({
     showPassengerArrived,
+    status,
+    onRouteAction,
+    getPassengerAction,
+    passenger,
+    passengerBound,
+    passengerLocation,
+    passengerDestination,
+    passengerName,
+    passengerSurname,
+    completeTripAction,
+    endTripAction,
+    passengerIsLoading,
+    onOptions,
+    allTripsOnRoute,
 }) => {
 
     const onOkay = () =>{
@@ -44,8 +60,24 @@ const PassengerArrived = ({
                 fontWeight={"bold"}
                 fontSize={20}
             >{"You have arrived please confirm your trip!"}</Text>
+            <StatusComponent
+                status={status}
+                onRouteAction={onRouteAction}
+                getPassengerAction={getPassengerAction}
+                passenger={passenger}
+                passengerBound={passengerBound}
+                passengerLocation={passengerLocation}
+                passengerDestination={passengerDestination}
+                passengerName={passengerName}
+                passengerSurname={passengerSurname}
+                completeTripAction={completeTripAction}
+                endTripAction={endTripAction}
+                passengerIsLoading={passengerIsLoading}
+                onOptions={onOptions}
+                allTripsOnRoute={allTripsOnRoute}
+            />
             {
-                <Pressable
+                /*<Pressable
                     py={2}
                     px={2}
                     bg={"#745D95"}
@@ -61,7 +93,7 @@ const PassengerArrived = ({
                         color = { "#FFFFFF"}
                         fontWeight={"bold"}
                     >OK</Text>
-                </Pressable>
+                </Pressable>*/
             }
         </VStack> 
     </>

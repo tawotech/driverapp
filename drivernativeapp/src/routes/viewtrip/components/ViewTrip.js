@@ -15,6 +15,7 @@ import { AppState, Alert, PermissionsAndroid,Platform } from 'react-native';
 import OverlayPermissionModule from "rn-android-overlay-permission";
 import Disclosure from './disclosure/Disclosure'
 import PassengerArrived from './passengerArrived/PassengerArrived';
+import Query from './query/Query';
 
 const ViewTrip = ({
     navigation,
@@ -51,7 +52,10 @@ const ViewTrip = ({
     allTripsOnRouteAction,
     refreshTripAction,
     showPassengerArrived,
-    passengerArrived
+    passengerArrived,
+    showQuery,
+    showQueryAction,
+    sendQueryAction
 }) =>
 {
 
@@ -230,6 +234,30 @@ const ViewTrip = ({
 
             }
             {
+                passengerArrived &&
+                <PassengerArrived 
+                    showPassengerArrived={showPassengerArrived}
+                    status = {status}
+                    trips = {trips}
+                    acceptTripAction = {acceptTripAction}
+                    onRouteAction = {onRouteAction}
+                    getPassengerAction = {getPassengerAction}
+                    passenger={passenger}
+                    passengerBound={passengerBound}
+                    passengerLocation={passengerLocation}
+                    passengerDestination={passengerDestination}
+                    passengerName={passengerName}
+                    passengerSurname={passengerSurname}
+                    trip_id = {trip_id}
+                    completeTripAction = {completeTripAction}
+                    endTripAction = {endTripAction}
+                    passengerIsLoading = {passengerIsLoading}
+                    navigation = {navigation}
+                    onOptions={onOptions}
+                    allTripsOnRoute = {allTripsOnRoute}
+                />
+            }
+            {
                 showOptions && 
                 <Options 
                     optionsData={optionsData} 
@@ -249,11 +277,11 @@ const ViewTrip = ({
                     setShowDisclosure={setShowDisclosure}
                 />
             }
-
             {
-                passengerArrived &&
-                <PassengerArrived 
-                    showPassengerArrived={showPassengerArrived}
+                showQuery &&
+                <Query
+                    showQueryAction={showQueryAction}
+                    sendQueryAction={sendQueryAction}
                 />
             }
         </Center>

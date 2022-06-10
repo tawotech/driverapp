@@ -53,9 +53,9 @@ const initialState = {
     isLoading: true,
     currentLocation: null,
     prevLocation: null,
-    startCalculatingDistance: false,
     allTripsOnRoute: "false",
-    passengerArrived: false, 
+    passengerArrived: false,
+    showQuery: false
 }
 
 /**
@@ -77,11 +77,10 @@ const {
     SKIP_TRIP,
     SET_LOCATIONS,
     GET_INITIAL_LOCATION,
-    CALCULATE_DISTANCE_TRAVELLED,
-    START_CALCULATING_DISTANCE,
     ALL_TRIPS_ON_ROUTE,
     UPDATE_WIDGET_STATUS,
-    PASSENGER_ARRIVED
+    PASSENGER_ARRIVED,
+    SHOW_QUERY
 } = actionConstants;
 const MONTH_OF_THE_YEAR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -494,7 +493,8 @@ export function completeTripAction() {
                     type: COMPLETE_TRIP,
                     payload: {
                         passenger,
-                        passengerStatus
+                        passengerStatus,
+                        passengerArrived: false
                     }
                 });
 
@@ -533,7 +533,8 @@ export function skipTripAction() {
                     type: SKIP_TRIP,
                     payload: {
                         passenger,
-                        passengerStatus
+                        passengerStatus,
+                        passengerArrived: false
                     }
                 });
 
@@ -573,6 +574,7 @@ export function endTripAction() {
                     type: END_TRIP,
                     payload: {
                         status,
+                        passengerArrived: false
                     }
                 });
                 let widgetState = await getWidgetState();
@@ -589,7 +591,7 @@ export function endTripAction() {
                 RouteService.stop();
                 TrackingService.stop();
                 PassengerProximityService.stop();
-
+                dispatch(showQueryAction(true));
             })
             .catch((e) => {
                 console.log(e);
@@ -671,7 +673,8 @@ export function openInGoogeMapsAction(data) {
                         passengerBound: bound,
                         status,
                         allTripsOnRoute,
-                        trips
+                        trips,
+                        dispatch
                     });
                 }
             });
@@ -727,30 +730,31 @@ export function allTripsOnRouteAction() {
                 }
             }
         )
-            .then(async (res) => {
-                let allTripsOnRoute = res.data.all_trips_on_route;
-                dispatch({
-                    type: ALL_TRIPS_ON_ROUTE,
-                    payload: {
-                        allTripsOnRoute
-                    }
-                });
-
-                let widgetState = await getWidgetState();
-                let isOpen = await isWidgetOpen();
-
-                if (widgetState != null && isOpen) {
-                    widgetState.allTripsOnRoute = allTripsOnRoute;
-                    await setWidgetState(widgetState);
-                    widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
+        .then(async (res) => {
+            let allTripsOnRoute = res.data.all_trips_on_route;
+            dispatch({
+                type: ALL_TRIPS_ON_ROUTE,
+                payload: {
+                    allTripsOnRoute,
+                    passengerArrived: false
                 }
-
-                //attempt to start route tracking service
-                //startRecordingRouteAction(trip_id);
-            })
-            .catch((e) => {
-                console.log(e);
             });
+
+            let widgetState = await getWidgetState();
+            let isOpen = await isWidgetOpen();
+
+            if (widgetState != null && isOpen) {
+                widgetState.allTripsOnRoute = allTripsOnRoute;
+                await setWidgetState(widgetState);
+                widgetPerformAction(WidgetService.UPDATE_PASSENGER, widgetState);
+            }
+
+            //attempt to start route tracking service
+            //startRecordingRouteAction(trip_id);
+        })
+        .catch((e) => {
+            console.log(e);
+        });
     }
 }
 
@@ -762,6 +766,50 @@ export function refreshTripAction() {
         }
     }
 }
+
+export function showQueryAction(show) {
+    return (dispatch, store) => {
+        dispatch({
+            type: SHOW_QUERY,
+            payload:{
+                showQuery: show
+            }
+        })
+        
+    }
+}
+
+export function sendQueryAction({selectedSubject, issueDescription}) {
+    return (dispatch, store) => {
+        const {date, time, company} = store().viewTrip;        
+        axios.post(`${url}/api_queries/create`,
+            {
+                query:{
+                    subject: selectedSubject,
+                    description: issueDescription,
+                    date,
+                    time,
+                    contact_alt: '', 
+                    resolved: false,
+                    company_name: company 
+                }                 
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${store().navigate.userToken}`
+                }
+            }
+        )
+        .then(async (res) => {
+            dispatch(showQueryAction(false));
+        })
+        .catch((e) => {
+            console.log(e);
+        });
+    }
+}
+
+
 
 /**
  * Action handlers
@@ -823,21 +871,23 @@ function handleGetPassenger(state, action) {
 function handleCompleteTrip(state, action) {
     return update(state, {
         passenger: { $set: action.payload.passenger },
-        passengerStatus: { $set: action.payload.passengerStatus }
+        passengerStatus: { $set: action.payload.passengerStatus },
+        passengerArrived:{$set: action.payload.passengerArrived},
     });
 }
 
 function handleSkipTrip(state, action) {
     return update(state, {
         passenger: { $set: action.payload.passenger },
-        passengerStatus: { $set: action.payload.passengerStatus }
+        passengerStatus: { $set: action.payload.passengerStatus },
+        passengerArrived:{$set: action.payload.passengerArrived},
     });
 }
 
 function handleEndTrip(state, action) {
     return update(state, {
         status: { $set: action.payload.status },
-        startCalculatingDistance: { $set: action.payload.startCalculatingDistance },
+        passengerArrived:{$set: action.payload.passengerArrived},
     });
 }
 
@@ -880,18 +930,19 @@ function handleGetInitialLocation(state, action) {
 function handleAllTripsOnRoute(state, action) {
     return update(state, {
         allTripsOnRoute: { $set: action.payload.allTripsOnRoute },
-    })
-}
-
-function handleStartCalculatingDistance(state, action) {
-    return update(state, {
-        startCalculatingDistance: { $set: action.payload.startCalculatingDistance },
+        passengerArrived: { $set: action.payload.passengerArrived },
     })
 }
 
 function handlePassengerArrived(state, action) {
     return update(state, {
         passengerArrived: { $set: action.payload.passengerArrived },
+    })
+}
+
+function handleShowQuery(state, action) {
+    return update(state, {
+        showQuery: { $set: action.payload.showQuery },
     })
 }
 
@@ -909,9 +960,9 @@ const ACTION_HANDLERS = {
     SKIP_TRIP: handleSkipTrip,
     SET_LOCATIONS: handleSetLocations,
     GET_INITIAL_LOCATION: handleGetInitialLocation,
-    START_CALCULATING_DISTANCE: handleStartCalculatingDistance,
     ALL_TRIPS_ON_ROUTE: handleAllTripsOnRoute,
-    PASSENGER_ARRIVED: handlePassengerArrived
+    PASSENGER_ARRIVED: handlePassengerArrived,
+    SHOW_QUERY: handleShowQuery
 }
 
 export function ViewTripReducer(state = initialState, action) {

@@ -687,6 +687,9 @@ public class FloatingWidgetService extends Service implements View.OnClickListen
         }
 
         yesNoView.setVisibility(View.GONE);
+        // hide expanded view
+        collapsedView.setVisibility(View.VISIBLE);
+        expandedView.setVisibility(View.GONE);
     }
 
     private void onNo(){

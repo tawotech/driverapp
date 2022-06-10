@@ -7,6 +7,7 @@
  import axios from 'axios';
  import apiConstants from '../../../api/apiConstants'
  import AsyncStorage from '@react-native-community/async-storage';
+ import PushNotification from 'react-native-push-notification'
 
 
  const {url} = apiConstants;
@@ -20,7 +21,9 @@ const initialState = {
     surname: null,
     startDate: null,
     fcmToken: null,
-
+    notifications: [],
+    notificationTrip: null,
+    notificationTripIsLoading: false
 };
 
  /**
@@ -31,11 +34,45 @@ const {
     GET_GROUPED_TRIPS,
     TRIPS_IS_LOADING,
     ASSIGN_FCM_TOKEN,
-    UNASSIGN_FCM_TOKEN
+    UNASSIGN_FCM_TOKEN,
+    ON_TRIP_NOTIFICATION,
+    NOTIFICATION_TRIP_IS_LOADING,
+    GET_NOTIFICATION_TRIP_DATA,
+    CLOSE_TRIP_NOTIFICATION,
+    NOTIFICATION_ACCEPT_TRIP,
+    NOTIFICATION_DECLINE_TRIP
 } = actionConstants;
 
 const MONTH_OF_THE_YEAR = ["Jan","Feb","Mar","Apr", "May", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+const handleNotification = (date, time) => {
+
+    let formatedTime = time.split(":");
+    let notifDate = new Date(date);
+    notifDate.setHours(formatedTime[0]);
+    if (formatedTime[1] == "00AM" || formatedTime[1] == "00PM") {
+        formatedTime[1] = 0;
+    }
+    else {
+        formatedTime[1] = 30;
+    }
+    notifDate.setMinutes(formatedTime[1]);
+
+    // change to an hour before
+    notifDate.setHours(notifDate.getHours() - 1);
+
+    PushNotification.localNotificationSchedule({
+        channelId: "app-channel",
+        title: `Etapath Trip Message`,
+        message: `You have a trip booked for ${notifDate.getDate()}/${MONTH_OF_THE_YEAR[notifDate.getMonth()]}/${notifDate.getFullYear()} at ${time}, get ready!`,
+        //date: new Date(Date.now() + 10 * 1000),
+        date: notifDate,
+        allowWhileIdle: true,
+        data: {
+            openedInForeground: true
+        }
+    })
+}
 
 /**
  * Actions
@@ -52,6 +89,50 @@ export function isLoadingAction(isLoading)
         })
     }
 }
+
+export function notificationTripIsLoadingAction(notificationTripIsLoading)
+{
+    return (dispatch, store)=>{
+        dispatch({
+            type: NOTIFICATION_TRIP_IS_LOADING,
+            payload:{
+                notificationTripIsLoading
+            }
+        })
+    }
+}
+
+export function onTripNotificationAction(notification)
+{
+    return (dispatch, store)=>{
+
+        let notifications = store().trips.notifications;
+        notifications.push(notification);
+        dispatch({
+            type: ON_TRIP_NOTIFICATION,
+            payload:{
+                notifications
+            }
+        })
+    }
+}
+
+export function closeTripNotificationAction()
+{
+    return (dispatch, store)=>{
+
+        let notifications = store().trips.notifications;
+        notifications.shift();
+        dispatch({
+            type: CLOSE_TRIP_NOTIFICATION,
+            payload:{
+                notifications,
+                notificationTrip: null
+            }
+        })
+    }
+}
+
 export const getGroupedTripsAction = () =>{
     return async (dispatch, store)=>{
 
@@ -129,6 +210,105 @@ export const unassignFcmTokenAction = (token)=>{
     }
 }
 
+export function getNotificationTripDataAction(id) {
+    return (dispatch, store) => {
+        dispatch(notificationTripIsLoadingAction(true));
+
+        axios.get(`${url}/api_grouped_trips/show?id=${id}`, {
+            headers: {
+                'Authorization': `Bearer ${store().navigate.userToken}`
+            }
+        })
+            .then(async (res) => {
+                dispatch({
+                    type: GET_NOTIFICATION_TRIP_DATA,
+                    payload: {
+                        notificationTrip: res.data
+                    }
+                });
+                notificationTripIsLoadingAction(false);
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+    }
+}
+
+export function notificationAcceptTripAction() {
+    return (dispatch, store) => {
+        const { notificationTrip, incompleteTrips } = store().trips;
+        axios.post(`${url}/api_grouped_trips/accept`,
+            {
+                id: notificationTrip.trip_id
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${store().navigate.userToken}`
+                }
+            }
+        )
+            .then(async (res) => {
+
+                let updatedIncompleteTrips = incompleteTrips.map((trip)=>{
+                    if(trip.trip_id == notificationTrip.trip_id)
+                    {
+                        trip.status = res.data.status;
+                        return trip;
+                    }
+                    else
+                    {
+                        return trip;
+                    }
+                });
+
+                dispatch({
+                    type: NOTIFICATION_ACCEPT_TRIP,
+                    payload: {
+                        incompleteTrips: updatedIncompleteTrips,
+                    }
+                });
+
+                dispatch(closeTripNotificationAction());
+
+                handleNotification(notificationTrip.date, notificationTrip.time);
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+    }
+}
+
+export function notificationDeclineTripAction() {
+    return (dispatch, store) => {
+        const { notificationTrip, incompleteTrips } = store().trips;
+        axios.post(`${url}/api_grouped_trips/decline`,
+            {
+                id: notificationTrip.trip_id
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${store().navigate.userToken}`
+                }
+            }
+        )
+            .then(async (res) => {
+
+                let updatedIncompleteTrips = incompleteTrips.filter((trip)=>trip.trip_id != notificationTrip.trip_id);
+                dispatch({
+                    type: NOTIFICATION_DECLINE_TRIP,
+                    payload: {
+                        incompleteTrips: updatedIncompleteTrips
+                    }
+                });
+                dispatch(closeTripNotificationAction());
+            })
+            .catch((e) => {
+                console.log(e);
+            });
+    }
+}
+
+
 /**
  * Action handlers
  */
@@ -163,12 +343,56 @@ function handleUnassignFcmToken(state, action)
     })
 }
 
+function handleOnTripNotification(state, action)
+{
+    return update( state,{
+        notifications: { $set: action.payload.notifications } ,
+    })
+}
+
+function handleCloseTripNotification(state, action)
+{
+    return update( state,{
+        notifications: { $set: action.payload.notifications },
+        notificationTrip:{ $set: action.payload.noticationTrip}
+    })
+}
+
+function handleNotificationTripIsLoading (state,action){
+    return update(state,{
+        notificationTripIsLoading:{ $set: action.payload.notificationTripIsLoading}
+    })
+}
+
+function handleGetNotificationTripData (state,action){
+    return update(state,{
+        notificationTrip:{ $set: action.payload.notificationTrip}
+    })
+}
+
+function handleNotificationAcceptTrip (state,action){
+    return update(state,{
+        incompleteTrips:{ $set: action.payload.incompleteTrips}
+    })
+}
+
+function handleNotificationDeclineTrip (state,action){
+    return update(state,{
+        incompleteTrips:{ $set: action.payload.incompleteTrips}
+    })
+}
 
 const ACTION_HANDLERS = {
     GET_GROUPED_TRIPS: handleGetGroupedTrips,
     TRIPS_IS_LOADING: handleIsLoading,
     ASSIGN_FCM_TOKEN: handleAssignFcmToken,
-    UNASSIGN_FCM_TOKEN: handleUnassignFcmToken
+    UNASSIGN_FCM_TOKEN: handleUnassignFcmToken,
+    ON_TRIP_NOTIFICATION: handleOnTripNotification,
+    NOTIFICATION_TRIP_IS_LOADING: handleNotificationTripIsLoading,
+    GET_NOTIFICATION_TRIP_DATA: handleGetNotificationTripData,
+    CLOSE_TRIP_NOTIFICATION: handleCloseTripNotification,
+    NOTIFICATION_ACCEPT_TRIP: handleNotificationAcceptTrip,
+    NOTIFICATION_DECLINE_TRIP: handleNotificationDeclineTrip
 }
 
 export function TripsReducer (state = initialState, action){

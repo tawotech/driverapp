@@ -14,7 +14,9 @@ import {
     skipTripAction,
     allTripsOnRouteAction,
     refreshTripAction,
-    showPassengerArrived
+    showPassengerArrived,
+    sendQueryAction,
+    showQueryAction
 } from '../modules/viewTrip'
 
 const mapStateToProps = (state) =>({
@@ -38,7 +40,8 @@ const mapStateToProps = (state) =>({
     passengerSurname: state.viewTrip.passengerSurname,
     firstPassenger: state.viewTrip.firstPassenger,
     allTripsOnRoute: state.viewTrip.allTripsOnRoute,
-    passengerArrived: state.viewTrip.passengerArrived
+    passengerArrived: state.viewTrip.passengerArrived,
+    showQuery: state.viewTrip.showQuery
 });
 
 const mapActionCreators = {
@@ -54,7 +57,9 @@ const mapActionCreators = {
     skipTripAction,
     allTripsOnRouteAction,
     refreshTripAction,
-    showPassengerArrived
+    showPassengerArrived,
+    showQueryAction,
+    sendQueryAction
 };
 
 export default connect (mapStateToProps,mapActionCreators)(ViewTrip); 

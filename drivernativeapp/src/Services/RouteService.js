@@ -48,6 +48,8 @@ export const checkStartProximity = async ()  =>  {
                         stopCheckStartProximity();
                         startRecording();
                         checkEndProximity();
+                        routeState.startTime = Date.now();
+                        await setRouteState(routeState);
                     }
                 },
                 (error)=>{
@@ -56,8 +58,9 @@ export const checkStartProximity = async ()  =>  {
                 {   
                     enableHighAccuracy: true, 
                     forceLocationManager: true,
-                    interval: 500,
-                    fastestInterval: 200
+                    interval: 5000, // 5 seconds
+                    fastestInterval: 4000, // 4 seconds
+                    distanceFilter: 0,
                 }
             );
         }
@@ -102,8 +105,9 @@ export const checkEndProximity = async ()  =>  {
                 {   
                     enableHighAccuracy: true, 
                     forceLocationManager: true,
-                    interval: 500,
-                    fastestInterval: 200
+                    interval: 5000, // 5 seconds
+                    fastestInterval: 4000, // 4 seconds
+                    distanceFilter: 0,
                 }
             );
         }
@@ -132,10 +136,10 @@ export const  startRecording = async () =>{
                 },
                 {   
                     enableHighAccuracy: true, 
-                    distanceFilter: 75,
+                    distanceFilter: 30, //30 meters
                     forceLocationManager: true,
-                    interval: 10000,
-                    fastestInterval: 5000
+                    interval: 5000, // 5 seconds
+                    fastestInterval: 4000, // 4 seconds
                 }
             );
         }
@@ -155,7 +159,7 @@ export async function recordRouteTravelled(currentLocation)
     let routeState = await getRouteState();
     //console.log("Route service location: " + `${currentLocation.latitude},${currentLocation.longitude}`);
     routeState.route.push(`${currentLocation.latitude},${currentLocation.longitude}`);
-    setRouteState(routeState);
+    await setRouteState(routeState);
 }
 
 
@@ -282,11 +286,17 @@ export const sendRouteData = async () =>{
     {
         let trip_id = routeState.trip_id;
         let route = routeState.route.join('|');
+        let duration = "0hr 0min";
+        if(routeState.startTime != null)
+        {
+           duration = await getDuration(routeState.startTime);
+        }
 
         const response = await axios.post(`${url}/api_grouped_trips/set_route`,
                                 {
                                     id: trip_id,
-                                    route
+                                    route,
+                                    duration
                                 },
                                 {
                                     headers:{
@@ -308,6 +318,14 @@ const getUserToken = async () =>{
     return userToken;
 } 
 
+const getDuration  = (startTime) =>{
+    let diff = (Math.abs(Date.now() - startTime))/(60*60* 1000);
+
+    let hours = Math.floor(diff);
+    let minutes = Math.round((diff - hours) * 60); // convert to minutes
+    return `${hours}hr ${minutes}min`
+}
+
 const initialiseState = async (trip_id) => {
     const userToken =  await getUserToken();
     const response = await axios.post(`${url}/api_grouped_trips/trip_route_data`,
@@ -324,7 +342,8 @@ const initialiseState = async (trip_id) => {
         trip_id,
         route: [],
         startLocation: response.data.start_location,
-        endLocation: response.data.end_location
+        endLocation: response.data.end_location,
+        startTime: null,
     });
 }
 
