@@ -25,7 +25,7 @@ const stopTracking = () =>{
 }
 
 export const checkStartProximity = async ()  =>  {
-    console.log("Tracking service: starting check proximity ====>");
+    //console.log("Tracking service: starting check proximity ====>");
     try {
         
         let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
@@ -42,13 +42,13 @@ export const checkStartProximity = async ()  =>  {
                         longitude
                     }
                     const startProximity = await getPreciseDistance(trackingState.startLocation,currentLocation);
-                    console.log("Tracking service: start proximity: " + startProximity);
+                    //console.log("Tracking service: start proximity: " + startProximity);
 
                     if(startProximity < 400) // 400 meters
                     {
                         stopCheckStartProximity();
                         // set prev location in routing state
-
+                        trackingState.started = true;
                         trackingState.prevLocation = currentLocation;
                         await setTrackingState(trackingState);
                         startTracking();
@@ -93,12 +93,14 @@ export const checkEndProximity = async ()  =>  {
                         longitude
                     }
                     const endProximity = await getPreciseDistance(trackingState.endLocation,currentLocation);
-                    console.log("Tracking service: end proximity: " + endProximity);
+                    //console.log("Tracking service: end proximity: " + endProximity);
 
                     if(endProximity < 400) // 400 meters
                     {
                         await stopCheckEndProximity();
                         await stopTracking();
+                        trackingState.ended=true;
+                        await setTrackingState(trackingState);
                         await sendTrackingData();
                         showTracking(false);
                         stop();
@@ -313,17 +315,25 @@ const initialiseState = async (trip_id) => {
         distanceTravelled: 0,
         prevLocation: null,
         startLocation: response.data.start_location,
-        endLocation: response.data.end_location
+        endLocation: response.data.end_location,
+        started: false,
+        ended: false
     });
 }
 
 export const stop = async () =>{
-    await removeTrackingState();
     await stopCheckEndProximity();
     await stopCheckStartProximity();
     await stopTracking();
 
-    console.log("is running route service" +  ReactNativeForegroundService.is_task_running("RouteService"));
+    let trackingState = await getTrackingState();
+    if(trackingState != null && trackingState.started == true && trackingState.ended == false)
+    {
+        await sendTrackingData();
+    }
+    await removeTrackingState();
+
+    //console.log("is running route service" +  ReactNativeForegroundService.is_task_running("RouteService"));
     if(ReactNativeForegroundService.is_task_running("TrackingService"))
     {
         // remove the task
@@ -331,7 +341,7 @@ export const stop = async () =>{
     }
 
     let tasks = await ReactNativeForegroundService.get_all_tasks();
-    console.log("Tracking service: " + JSON.stringify(Object.keys(tasks)));
+    //console.log("Tracking service: " + JSON.stringify(Object.keys(tasks)));
     if(tasks && Object.keys(tasks).length == 0)
     {
         ReactNativeForegroundService.stop();

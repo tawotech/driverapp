@@ -781,7 +781,7 @@ export function showQueryAction(show) {
 
 export function sendQueryAction({selectedSubject, issueDescription}) {
     return (dispatch, store) => {
-        const {date, time, company} = store().viewTrip;        
+        const {date, time, company, trip_id} = store().viewTrip;        
         axios.post(`${url}/api_queries/create`,
             {
                 query:{
@@ -791,7 +791,8 @@ export function sendQueryAction({selectedSubject, issueDescription}) {
                     time,
                     contact_alt: '', 
                     resolved: false,
-                    company_name: company 
+                    company_name: company,
+                    grouped_trip_id: trip_id
                 }                 
             },
             {

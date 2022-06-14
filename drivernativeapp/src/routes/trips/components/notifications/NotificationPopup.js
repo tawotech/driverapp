@@ -22,8 +22,6 @@ const NotificationPopup = ({
 }) => {
 
     useEffect(()=>{
-        console.log("getting trip notification trip data");
-        console.log(notification);
         getNotificationTripDataAction(notification.data.id);
     },[notification]);
 
@@ -35,7 +33,7 @@ const NotificationPopup = ({
     return(
     <>
         <Pressable
-            onPress={()=>closeTripNotificationAction()}
+            onPress={()=>{}}
             w={"100%"}
             h={"100%"}
             position={"absolute"}

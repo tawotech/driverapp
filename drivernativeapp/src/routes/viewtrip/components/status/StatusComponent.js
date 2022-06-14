@@ -31,7 +31,11 @@ const StatusComponent = ({
     const onPressAction = (status, toggled = null)=>{
         if ( status == 'accepted')
         {
-            onRouteAction();
+            onOptions({
+                type: "startTrip",
+                command: "accept"
+            })
+            //onRouteAction();
         }
     }
 

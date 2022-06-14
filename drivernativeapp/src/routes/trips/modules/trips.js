@@ -108,6 +108,12 @@ export function onTripNotificationAction(notification)
 
         let notifications = store().trips.notifications;
         notifications.push(notification);
+        // sort the notifications
+        let compare = (a, b) => (a > b) - (a < b);
+        notifications = notifications.sort(function(a, b) {
+            return compare(a.data.timeslot, b.data.timeslot); //|| compare(a.data.date, b.data.date)
+        });
+
         dispatch({
             type: ON_TRIP_NOTIFICATION,
             payload:{

@@ -24,7 +24,7 @@ const stopRecording = () =>{
 }
 
 export const checkStartProximity = async ()  =>  {
-    console.log("Route service: starting check proximity ====>");
+    //console.log("Route service: starting check proximity ====>");
     try {
         
         let permitedFineLocation = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
@@ -41,14 +41,15 @@ export const checkStartProximity = async ()  =>  {
                         longitude
                     }
                     const startProximity = await getPreciseDistance(routeState.startLocation,currentLocation);
-                    console.log("route service: start proximity: " + startProximity);
+                    //console.log("route service: start proximity: " + startProximity);
 
-                    if(startProximity < 100) // 100 meters
+                    if(startProximity < 150) // 150 meters
                     {
                         stopCheckStartProximity();
                         startRecording();
                         checkEndProximity();
                         routeState.startTime = Date.now();
+                        routeState.started = true;
                         await setRouteState(routeState);
                     }
                 },
@@ -89,12 +90,14 @@ export const checkEndProximity = async ()  =>  {
                         longitude
                     }
                     const endProximity = await getPreciseDistance(routeState.endLocation,currentLocation);
-                    console.log("route service: end proximity: " + endProximity);
+                    //console.log("route service: end proximity: " + endProximity);
 
-                    if(endProximity < 100) // 100 meters
+                    if(endProximity < 150) // 100 meters
                     {
                         await stopCheckEndProximity();
                         await stopRecording();
+                        routeState.ended=true;
+                        await setRouteState(routeState);
                         await sendRouteData();
                         stop();
                     }
@@ -166,7 +169,6 @@ export async function recordRouteTravelled(currentLocation)
 
 export async function start(trip_id)
 {    
-    console.log("starting route service ~~~!!!");
     if (ReactNativeForegroundService.is_running())
     {
         if(ReactNativeForegroundService.is_task_running("RoutingService"))
@@ -215,10 +217,19 @@ export async function start(trip_id)
 }
 
 export const stop = async () =>{
-    await removeRouteState();
     await stopCheckEndProximity();
     await stopCheckStartProximity();
     await stopRecording();
+
+    let routeState = await getRouteState();
+
+    if(routeState != null && routeState.started == true && routeState.ended == false)
+    {
+        // if the end proximity trigger did not fire, send route date
+        //console.log("end poximity for route did not trigger");
+        await sendRouteData()
+    }
+    await removeRouteState();
 
     //console.log("is running tracking service " + ReactNativeForegroundService.is_task_running("TrackingService"));
 
@@ -233,7 +244,7 @@ export const stop = async () =>{
 
     if(tasks && Object.keys(tasks).length == 0)
     {
-        console.log("stopping in route service");
+        //console.log("stopping in route service");
         ReactNativeForegroundService.stop();
     }
 }
@@ -281,6 +292,7 @@ export const sendRouteData = async () =>{
     // update actual distance travelled on the  database
     const routeState = await getRouteState();
     const userToken =  await getUserToken();
+    //console.log("setting trip route now ====> " + JSON.stringify(routeState));
 
     if(userToken != null && routeState != null)
     {
@@ -291,7 +303,6 @@ export const sendRouteData = async () =>{
         {
            duration = await getDuration(routeState.startTime);
         }
-
         const response = await axios.post(`${url}/api_grouped_trips/set_route`,
                                 {
                                     id: trip_id,
@@ -303,6 +314,8 @@ export const sendRouteData = async () =>{
                                         'Authorization': `Bearer ${userToken}`
                                     }
                                 });
+        //console.log("Trip route has been set ===================> ");
+
     }
 }
 
@@ -344,6 +357,8 @@ const initialiseState = async (trip_id) => {
         startLocation: response.data.start_location,
         endLocation: response.data.end_location,
         startTime: null,
+        started: false,
+        ended: false
     });
 }
 

@@ -15,7 +15,8 @@ const Options = ({
     completeTripAction,
     navigation,
     allTripsOnRouteAction,
-    endTripAction
+    endTripAction,
+    onRouteAction
 }) => {
 
     const onYes = () =>{
@@ -53,6 +54,13 @@ const Options = ({
             if (optionsData.command == "accept")
             {
                 endTripAction();
+            }
+        }
+        else if(optionsData.type == "startTrip")
+        {
+            if (optionsData.command == "accept")
+            {
+                onRouteAction();
             }
         }
         setShowOptions(false);
@@ -124,6 +132,15 @@ const Options = ({
                 >{"You are about to end trip, are you sure?"}</Text>
             }
 
+            {   
+                (optionsData.type == "startTrip") &&
+                <Text
+                    color = "#535156"
+                    fontWeight={"bold"}
+                    fontSize={20}
+                >{"You are about to start trip, are you sure?"}</Text>
+            }
+
             <HStack
                 mt="5"
                 alignItems={"center"}
@@ -150,7 +167,7 @@ const Options = ({
                         >{ (optionsData.command == "accept") ? "Yes, confirm" : "Yes, decline"}</Text>
                     }
                     {   
-                        (optionsData.type == "allTripsOnRoute" || optionsData.type == "endTrip") &&
+                        (optionsData.type == "allTripsOnRoute" || optionsData.type == "endTrip" || optionsData.type == "startTrip") &&
                         <Text
                             fontWeight={"bold"}
                             color = "#FFFFFF"

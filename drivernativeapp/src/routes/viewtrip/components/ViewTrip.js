@@ -269,6 +269,7 @@ const ViewTrip = ({
                     navigation = {navigation}
                     allTripsOnRouteAction = {allTripsOnRouteAction} 
                     endTripAction = {endTripAction}
+                    onRouteAction = {onRouteAction}
                 />
             }
             {

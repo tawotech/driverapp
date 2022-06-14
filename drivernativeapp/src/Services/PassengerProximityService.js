@@ -62,7 +62,7 @@ export const startCheckProximity = async ()  =>  {
                                 currentLocation);
                             }
 
-                            console.log("trip id: => " + trip.id + "distance: => " + distance);
+                            //console.log("trip id: => " + trip.id + "distance: => " + distance);
 
                             proximities.push({
                                 trip,
@@ -79,10 +79,10 @@ export const startCheckProximity = async ()  =>  {
                             {
                                 // how promt
                                 WidgetService.showArrivedPassenger();                              
-                                console.log("widget is open: " + JSON.stringify(widgetIsOpen));
+                                //console.log("widget is open: " + JSON.stringify(widgetIsOpen));
                                 if( widgetIsOpen == false ) // if widget is closed
                                 {
-                                    console.log("dispatching passenger aarrived");
+                                    //console.log("dispatching passenger aarrived");
                                     proximityDispatch(showPassengerArrived(true));
                                 }
                                 Vibration.vibrate(2 * ONE_SECOND_IN_MS);
@@ -128,7 +128,7 @@ export const startCheckProximity = async ()  =>  {
 export async function start({trip_id, dispatch})
 {    
     proximityDispatch = dispatch;
-    console.log("starting passenger proximity service ~~~!!!");
+    //console.log("starting passenger proximity service ~~~!!!");
     if (ReactNativeForegroundService.is_running())
     {
         if(ReactNativeForegroundService.is_task_running("PassengerProximityService"))
@@ -193,7 +193,7 @@ export const stop = async () =>{
 
     if(tasks && Object.keys(tasks).length == 0)
     {
-        console.log("stopping in passenger proximity service");
+        //console.log("stopping in passenger proximity service");
         ReactNativeForegroundService.stop();
     }
 }
