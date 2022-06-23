@@ -45,19 +45,13 @@ const {
 
 const MONTH_OF_THE_YEAR = ["Jan","Feb","Mar","Apr", "May", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-const handleNotification = (date, time) => {
+const handleNotification = (date, time, firstPickupTime) => {
 
-    let formatedTime = time.split(":");
+    let formatedTime = firstPickupTime.split(":");
     let notifDate = new Date(date);
     notifDate.setHours(formatedTime[0]);
-    if (formatedTime[1] == "00AM" || formatedTime[1] == "00PM") {
-        formatedTime[1] = 0;
-    }
-    else {
-        formatedTime[1] = 30;
-    }
+    formatedTime[1] = formatedTime[1].slice(0,-2);
     notifDate.setMinutes(formatedTime[1]);
-
     // change to an hour before
     notifDate.setHours(notifDate.getHours() - 1);
 
@@ -275,8 +269,8 @@ export function notificationAcceptTripAction() {
                 });
 
                 dispatch(closeTripNotificationAction());
-
-                handleNotification(notificationTrip.date, notificationTrip.time);
+                const firstPickupTime = notificationTrip.first_passenger.split(" ")[2];
+                handleNotification(notificationTrip.date, notificationTrip.time, firstPickupTime);
             })
             .catch((e) => {
                 console.log(e);
